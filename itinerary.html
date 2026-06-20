@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Korea &amp; Japan — Jul 2026</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+
+<style>
+  :root{
+    --ivory:#13110c;          /* page bg */
+    --ivory-rgb:19,17,12;
+    --paper:#1c1a14;          /* cards / surfaces */
+    --paper-2:#221f18;        /* slightly raised */
+    --ink:#ece6d6;
+    --ink-soft:#a8a08e;
+    --ink-faint:#7a7363;
+    --rule:#2e2a20;
+    --rule-soft:#252118;
+    --kr:#d49a78;             /* Korea — dusty clay/peach */
+    --kr-soft:#2c1d14;
+    --jp:#94b3c4;             /* Japan — soft slate blue */
+    --jp-soft:#172530;
+    --warn:#d99a5a;
+    --warn-bg:#3a2a14;
+    --reserve:#b890c4;
+    --reserve-bg:#2d1f33;
+    --note-bg:#1f2519;
+    --note:#9eb38a;
+    --accent:var(--kr);
+    --accent-soft:var(--kr-soft);
+    --shadow:0 1px 2px rgba(0,0,0,.5), 0 12px 32px -18px rgba(0,0,0,.7);
+    --serif:'Newsreader', Georgia, 'Times New Roman', serif;
+    --sans:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mono:'Spline Sans Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+    color-scheme:dark;
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--ivory);color:var(--ink);
+    font-family:var(--sans);font-size:16px;line-height:1.5;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  }
+  a{color:inherit}
+
+  /* ---------- top bar ---------- */
+  header.bar{
+    position:sticky;top:0;z-index:1200;
+    background:rgba(var(--ivory-rgb),.88);backdrop-filter:saturate(1.4) blur(12px);
+    -webkit-backdrop-filter:saturate(1.4) blur(12px);
+    border-bottom:1px solid var(--rule);
+  }
+
+  /* ---------- day strip nav ---------- */
+  .day-strip{
+    position:sticky;top:var(--bar-h, 62px);z-index:1150;
+    background:rgba(var(--ivory-rgb),.85);backdrop-filter:saturate(1.4) blur(12px);
+    -webkit-backdrop-filter:saturate(1.4) blur(12px);
+    border-bottom:1px solid var(--rule);
+  }
+  .day-strip-inner{
+    max-width:1180px;margin:0 auto;padding:8px 24px;
+    display:flex;align-items:center;gap:6px;
+    overflow-x:auto;overflow-y:hidden;
+    scrollbar-width:thin;scrollbar-color:var(--rule) transparent;
+    scroll-behavior:smooth;
+  }
+  .day-strip-inner::-webkit-scrollbar{height:4px}
+  .day-strip-inner::-webkit-scrollbar-track{background:transparent}
+  .day-strip-inner::-webkit-scrollbar-thumb{background:var(--rule);border-radius:4px}
+  .day-strip .ds-group{display:flex;align-items:center;gap:4px;flex-shrink:0}
+  .day-strip .ds-label{
+    font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--ink-faint);padding:0 8px 0 2px;flex-shrink:0;
+  }
+  .day-strip .ds-sep{width:1px;height:18px;background:var(--rule);margin:0 8px;flex-shrink:0}
+  .day-strip .ds-pill{
+    font-family:var(--mono);font-size:11.5px;font-weight:500;color:var(--ink-soft);
+    border:1px solid var(--rule);background:transparent;
+    padding:5px 11px;border-radius:999px;cursor:pointer;flex-shrink:0;
+    transition:color .15s, border-color .15s, background .15s;
+    white-space:nowrap;
+  }
+  .day-strip .ds-pill:hover{color:var(--ink);border-color:var(--ink-soft)}
+  .day-strip .ds-pill[data-c="kr"].active{color:var(--ivory);background:var(--kr);border-color:var(--kr)}
+  .day-strip .ds-pill[data-c="jp"].active{color:var(--ivory);background:var(--jp);border-color:var(--jp)}
+  .bar-inner{
+    max-width:1180px;margin:0 auto;padding:14px 24px;
+    display:flex;align-items:center;gap:18px;
+    flex-wrap:wrap;
+  }
+  .header-day{
+    display:flex;align-items:baseline;gap:10px;
+    font-family:var(--sans);font-size:13px;color:var(--ink-soft);
+    white-space:nowrap;min-width:0;flex:1 1 220px;overflow:hidden;
+    padding-left:14px;border-left:1px solid var(--rule);
+    transition:opacity .25s;
+  }
+  .header-day.empty{opacity:.55;font-style:italic;border-left-color:transparent;padding-left:0}
+  .header-day .hd-meta{
+    font-family:var(--mono);font-size:10.5px;font-weight:500;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--ink-faint);
+    padding:3px 9px;border:1px solid var(--rule);border-radius:999px;
+    background:var(--paper);flex-shrink:0;
+  }
+  .header-day .hd-title{color:var(--ink);font-weight:500;overflow:hidden;text-overflow:ellipsis;min-width:0}
+  .header-day .hd-area{color:var(--ink-faint);overflow:hidden;text-overflow:ellipsis;min-width:0}
+  .header-day .hd-area::before{content:'· ';color:var(--ink-faint);margin-right:2px}
+  .wordmark{font-family:var(--serif);font-size:18px;letter-spacing:.2px;white-space:nowrap}
+  .wordmark .dot{color:var(--accent)}
+  .bar-spacer{flex:1}
+  .today-pill{
+    font-family:var(--mono);font-size:12px;color:var(--ink-faint);
+    border:1px solid var(--rule);border-radius:999px;padding:5px 11px;white-space:nowrap;
+  }
+
+  /* country toggle */
+  .toggle{display:inline-flex;background:var(--paper);border:1px solid var(--rule);border-radius:999px;padding:3px}
+  .toggle button{
+    font-family:var(--sans);font-size:13px;font-weight:500;color:var(--ink-soft);
+    border:0;background:transparent;padding:7px 16px;border-radius:999px;cursor:pointer;
+    display:flex;align-items:center;gap:7px;transition:color .2s;
+  }
+  .toggle button .swatch{width:8px;height:8px;border-radius:50%}
+  .toggle button[data-c="kr"] .swatch{background:var(--kr)}
+  .toggle button[data-c="jp"] .swatch{background:var(--jp)}
+  .toggle button[aria-selected="true"]{color:var(--ink);background:var(--ivory);box-shadow:inset 0 0 0 1px var(--rule)}
+
+  /* ---------- hero / today ---------- */
+  .hero{max-width:1180px;margin:0 auto;padding:46px 24px 8px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 14px}
+  .today-card{
+    background:var(--paper);border:1px solid var(--rule);border-radius:18px;
+    box-shadow:var(--shadow);overflow:hidden;
+  }
+  .today-grid{display:grid;grid-template-columns:300px 1fr}
+  .today-status{
+    padding:34px 32px;border-right:1px solid var(--rule-soft);
+    display:flex;flex-direction:column;justify-content:center;gap:6px;
+    background:linear-gradient(180deg,var(--paper-2),var(--paper));
+  }
+  .status-kicker{font-family:var(--mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-faint)}
+  .status-big{font-family:var(--serif);font-size:46px;line-height:1;letter-spacing:-.5px}
+  .status-big .unit{font-size:18px;color:var(--ink-soft);font-style:italic}
+  .status-sub{color:var(--ink-soft);font-size:14px}
+
+  .today-detail{padding:30px 34px}
+  .td-flag{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:10px}
+  .td-flag .swatch{width:9px;height:9px;border-radius:50%}
+  .today-title{font-family:var(--serif);font-size:27px;line-height:1.15;margin:0 0 4px;letter-spacing:-.2px}
+  .today-area{color:var(--ink-soft);font-size:14px;margin-bottom:18px}
+  .mini-timeline{display:flex;flex-direction:column;gap:9px;margin-bottom:20px}
+  .mini-row{display:flex;gap:14px;font-size:14px;align-items:baseline}
+  .mini-row .mt{font-family:var(--mono);font-size:12px;color:var(--ink-faint);min-width:74px;white-space:nowrap}
+  .mini-row .mx{color:var(--ink-soft)}
+  .mini-more{font-size:13px;color:var(--ink-faint);font-style:italic}
+  .jump-btn{
+    align-self:flex-start;font-family:var(--sans);font-size:13px;font-weight:500;
+    color:#fff;background:var(--accent);border:0;border-radius:999px;padding:9px 18px;cursor:pointer;
+    transition:opacity .2s;
+  }
+  .jump-btn:hover{opacity:.88}
+
+  /* ---------- country section ---------- */
+  .panel{max-width:1180px;margin:0 auto;padding:34px 24px 70px;display:none;scroll-margin-top:calc(var(--bar-h, 62px) + 56px)}
+  .panel.active{display:block}
+  .panel-head{display:flex;align-items:flex-end;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+  .panel-head h2{font-family:var(--serif);font-size:34px;margin:0;letter-spacing:-.4px;line-height:1}
+  .panel-head .ph-rule{flex:1;height:1px;background:var(--rule);margin-bottom:9px;min-width:40px}
+  .panel-head .ph-meta{font-family:var(--mono);font-size:12px;color:var(--ink-faint);margin-bottom:4px}
+
+  .ph-filter{
+    display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+    margin-bottom:18px;padding:6px;background:var(--paper);
+    border:1px solid var(--rule);border-radius:999px;align-self:flex-start;
+  }
+  .ph-filter .pf-label{
+    font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--ink-faint);padding:0 8px 0 10px;
+  }
+  .ph-filter button{
+    font-family:var(--sans);font-size:12px;font-weight:500;color:var(--ink-soft);
+    border:0;background:transparent;padding:5px 12px;border-radius:999px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:6px;transition:color .15s, background .15s;
+  }
+  .ph-filter button:hover{color:var(--ink)}
+  .ph-filter button.active{color:var(--ink);background:var(--ivory);box-shadow:inset 0 0 0 1px var(--rule)}
+  .ph-filter button .swatch{width:7px;height:7px;border-radius:50%}
+  .ph-filter button[data-filter="reserve"] .swatch{background:var(--reserve)}
+  .ph-filter button[data-filter="warn"] .swatch{background:var(--warn)}
+  .ph-filter button .count{font-family:var(--mono);font-size:10px;color:var(--ink-faint);margin-left:2px}
+
+  .day[data-filter="reserve"]:not(:has(.chip.reserve)),
+  .day[data-filter="warn"]:not(:has(.chip.warn)){display:none}
+  .day[data-filter="reserve"] .stop:not(:has(.chip.reserve)),
+  .day[data-filter="warn"] .stop:not(:has(.chip.warn)){display:none}
+
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:30px;align-items:start}
+
+  /* map */
+  .map-wrap{position:sticky;top:calc(var(--bar-h, 62px) + 60px)}
+  .map-shell{
+    border:1px solid var(--rule);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);
+    background:var(--paper);
+  }
+  .map-el{height:440px;width:100%;background:#0d0b07}
+  .map-cap{
+    padding:11px 16px;border-top:1px solid var(--rule-soft);
+    font-size:12.5px;color:var(--ink-soft);display:flex;gap:9px;align-items:center;
+  }
+  .map-cap .dotk{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .leaflet-container{font-family:var(--sans);background:#0d0b07}
+  .leaflet-popup-content-wrapper{
+    border-radius:9px;background:var(--paper);color:var(--ink);
+    border:1px solid var(--rule);box-shadow:var(--shadow);
+  }
+  .leaflet-popup-tip{background:var(--paper);border:1px solid var(--rule)}
+  .leaflet-popup-content{margin:9px 13px;font-size:13px;color:var(--ink)}
+  .leaflet-popup-content a{color:var(--accent);text-decoration:none}
+  .leaflet-popup-content a:hover{text-decoration:underline}
+  .leaflet-container a.leaflet-popup-close-button{color:var(--ink-faint)}
+  .leaflet-container a.leaflet-popup-close-button:hover{color:var(--ink)}
+  .leaflet-bar a, .leaflet-bar a:hover{
+    background:var(--paper);color:var(--ink);border-bottom-color:var(--rule);
+  }
+  .leaflet-bar a:hover{background:var(--paper-2)}
+  .leaflet-control-attribution{
+    background:rgba(var(--ivory-rgb),.75)!important;color:var(--ink-faint)!important;
+  }
+  .leaflet-control-attribution a{color:var(--ink-soft)!important}
+
+  /* day list */
+  .days{display:flex;flex-direction:column;gap:16px}
+  .day{
+    background:var(--paper);border:1px solid var(--rule);border-radius:14px;
+    box-shadow:var(--shadow);overflow:hidden;scroll-margin-top:calc(var(--bar-h, 62px) + 56px);
+    transition:border-color .25s, box-shadow .25s;
+  }
+  .day.sel{border-color:var(--accent);box-shadow:0 1px 2px rgba(0,0,0,.4),0 18px 36px -18px rgba(0,0,0,.7)}
+  .day.sel .day-head{background:color-mix(in srgb, var(--accent) 12%, transparent)}
+  .day-head{
+    width:100%;text-align:left;border:0;background:transparent;cursor:pointer;
+    padding:18px 20px;display:flex;align-items:flex-start;gap:16px;font-family:var(--sans);
+  }
+  .day-num{
+    font-family:var(--serif);font-size:12px;font-style:italic;color:#fff;
+    background:var(--accent);min-width:32px;height:32px;border-radius:10px;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .day-head .dh-main{min-width:0;flex:1}
+  .day-head .dh-title{display:block}
+  .day-head .dh-area{display:block;margin-top:6px;color:var(--ink-soft)}
+  .day-body{display:none;padding:2px 20px 22px 20px}
+  .day-head .dh-main{flex:1;min-width:0}
+  .day-head .dh-date{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint)}
+  .day-head .dh-title{font-family:var(--serif);font-size:19px;line-height:1.2;margin-top:1px}
+  .day-head .dh-area{font-size:13px;color:var(--ink-soft);margin-top:2px}
+  .day-head .chev{color:var(--ink-faint);transition:transform .25s;flex-shrink:0}
+  .day.open .chev{transform:rotate(90deg)}
+  .day.istoday .day-num{box-shadow:0 0 0 3px var(--accent-soft)}
+
+  .day-body{display:none;padding:2px 20px 22px 20px}
+  .day.open .day-body{display:block}
+
+  .day-pin{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;}
+  .day-pin .pin{
+    width:12px;height:12px;border-radius:50% 50% 50% 0;background:var(--accent);transform:rotate(-45deg);position:absolute;top:0;left:3px;box-shadow:0 0 0 2px rgba(255,255,255,.9), 0 0 0 3px rgba(0,0,0,.4);
+  }
+  .day-pin .pin-label{position:absolute;top:-6px;left:3.5px;font-size:9px;font-weight:700;color:#fff;letter-spacing:-.03em;}
+
+  /* transit-spine timeline (signature) */
+  .line{position:relative;padding-left:30px;margin-top:6px}
+  .line::before{content:"";position:absolute;left:8px;top:6px;bottom:6px;width:2px;
+    background:linear-gradient(180deg,var(--accent),var(--accent) 88%,transparent);opacity:.45}
+  .stop{position:relative;padding:9px 0}
+  .stop::before{content:"";position:absolute;left:-26px;top:14px;width:9px;height:9px;border-radius:50%;
+    background:var(--paper);border:2px solid var(--accent)}
+  .stop.major::before{background:var(--accent)}
+  .stop .t{font-family:var(--mono);font-size:12px;color:var(--accent);font-weight:500}
+  .stop .x{font-size:14.5px;line-height:1.45;margin-top:1px}
+  .stop .x b{font-weight:600}
+  .stop .x .sub{color:var(--ink-soft);font-size:13px}
+  .stop .x a.loc{
+    color:inherit;text-decoration:underline;text-decoration-style:dotted;
+    text-decoration-color:var(--ink-faint);text-decoration-thickness:1px;
+    text-underline-offset:3px;transition:color .15s,text-decoration-color .15s,text-decoration-style .15s;
+  }
+  .stop .x a.loc:hover{color:var(--accent);text-decoration-color:var(--accent);text-decoration-style:solid}
+  .stop .x a.loc b{font-weight:600}
+
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+  .chip{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;
+    padding:3px 8px;border-radius:6px;display:inline-flex;align-items:center;gap:5px;line-height:1.4}
+  .chip.warn{background:var(--warn-bg);color:var(--warn)}
+  .chip.reserve{background:var(--reserve-bg);color:var(--reserve)}
+  .chip.note{background:var(--note-bg);color:var(--note)}
+
+  /* critical flags callout */
+  .callout{
+    border:1px solid var(--rule);border-left:3px solid var(--accent);
+    background:var(--paper);border-radius:12px;padding:18px 22px;margin-bottom:24px;box-shadow:var(--shadow);
+  }
+  .callout h3{font-family:var(--serif);font-size:17px;margin:0 0 10px;display:flex;align-items:center;gap:9px}
+  .callout ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+  .callout li{font-size:14px;color:var(--ink-soft)}
+  .callout li b{color:var(--ink);font-weight:600}
+
+  /* footer */
+  footer{border-top:1px solid var(--rule);background:var(--paper)}
+  .foot{max-width:1180px;margin:0 auto;padding:40px 24px 56px;display:grid;grid-template-columns:1fr 1fr;gap:36px}
+  .foot h4{font-family:var(--mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 12px}
+  .foot ul{margin:0;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+  .foot li{font-size:14px;color:var(--ink-soft)}
+  .foot li b{color:var(--ink);font-weight:600}
+  .foot .fc{font-size:12px;color:var(--ink-faint);grid-column:1/-1;border-top:1px solid var(--rule-soft);padding-top:18px;line-height:1.6}
+
+  @media (max-width:980px){
+    .layout{grid-template-columns:1fr;gap:22px}
+    .map-wrap{position:static}
+    .map-el{height:320px}
+    .today-grid{grid-template-columns:1fr}
+    .today-status{border-right:0;border-bottom:1px solid var(--rule-soft)}
+  }
+  @media (max-width:760px){
+    .day-head{flex-direction:column;align-items:stretch}
+    .day-head .chev{align-self:flex-end;transform:none}
+    .day-cap{font-size:12px}
+    .day-num{min-width:28px;height:28px;font-size:11px}
+    .map-el{height:280px}
+  }
+  @media (max-width:620px){
+    .bar-inner{flex-wrap:wrap;gap:8px 10px;padding:10px 14px;align-items:center}
+    .bar-spacer{display:none}
+    .wordmark{font-size:15px;flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .today-pill{order:1;font-size:11px;padding:4px 10px;flex-shrink:0}
+    .toggle{order:2;flex:1 1 100%;justify-content:center;padding:2px}
+    .toggle button{padding:6px 14px;font-size:12.5px;flex:1 1 0}
+    .header-day{
+      order:99;flex:1 1 100%;width:100%;
+      padding:8px 0 0;margin-top:2px;
+      border-left:0;border-top:1px solid var(--rule);
+      gap:7px;flex-wrap:nowrap;overflow:hidden;
+      font-size:12.5px;line-height:1.3;
+    }
+    .header-day.empty{border-top-color:transparent;padding-top:4px}
+    .header-day .hd-meta{font-size:10px;padding:2px 8px;letter-spacing:.04em;flex:0 0 auto}
+    .header-day .hd-title{white-space:nowrap;flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
+    .header-day .hd-area{white-space:nowrap;flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;font-size:11.5px}
+    .day{scroll-margin-top:calc(var(--bar-h, 110px) + 56px)}
+    .day-strip-inner{padding:7px 14px;gap:5px}
+    .day-strip .ds-pill{font-size:11.5px;padding:7px 12px;min-width:32px;text-align:center}
+    .day-strip .ds-label{font-size:9.5px;padding:0 6px 0 2px}
+    .day-strip .ds-sep{margin:0 6px}
+    .hero{padding:14px 14px 6px}
+    .eyebrow{margin:0 0 8px;font-size:10.5px}
+    .today-card{border-radius:14px}
+    .today-status{padding:14px 16px 10px;border-bottom:1px solid var(--rule-soft);border-right:0;background:transparent;gap:2px}
+    .today-status .status-kicker{font-size:10px}
+    .today-status .status-sub{display:none}
+    .status-big{font-size:22px;display:flex;align-items:baseline;gap:6px}
+    .status-big .unit{font-size:13px}
+    .today-detail{padding:12px 16px 16px}
+    .td-flag{margin-bottom:6px;font-size:10px}
+    .today-title{font-size:16px}
+    .today-area{font-size:12px;margin-bottom:10px}
+    .mini-timeline{display:none}
+    .mini-more{display:none}
+    .jump-btn{font-size:12px;padding:7px 14px}
+    .panel{padding:18px 14px 56px}
+    .panel-head h2{font-size:24px}
+    .panel-head{gap:10px;margin-bottom:16px}
+    .ph-filter{padding:4px;gap:4px;width:100%}
+    .ph-filter .pf-label{font-size:9px;padding:0 6px 0 8px}
+    .ph-filter button{font-size:11px;padding:4px 9px}
+    .map-shell{border-radius:14px}
+    .day{border-radius:14px}
+    .day-head{padding:16px 18px}
+    .day-body{padding:2px 18px 20px}
+    .chev{margin-top:8px}
+    .foot{grid-template-columns:1fr;padding:34px 16px 48px}
+  }
+  /* ---------- scroll jump ---------- */
+  .scroll-jump{
+    position:fixed;bottom:24px;right:24px;z-index:1100;
+    display:flex;flex-direction:column;
+    background:rgba(var(--ivory-rgb),.85);backdrop-filter:saturate(1.4) blur(10px);
+    -webkit-backdrop-filter:saturate(1.4) blur(10px);
+    border:1px solid var(--rule);border-radius:999px;overflow:hidden;
+    box-shadow:var(--shadow);
+    opacity:0;pointer-events:none;transform:translateY(8px);
+    transition:opacity .25s, transform .25s, border-color .2s;
+  }
+  .scroll-jump.show{opacity:1;pointer-events:auto;transform:none}
+  .scroll-jump:hover{border-color:color-mix(in srgb, var(--accent) 50%, var(--rule))}
+  .scroll-jump button{
+    width:40px;height:40px;border:0;background:transparent;color:var(--ink-soft);
+    cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;
+    transition:color .15s, background .15s;
+  }
+  .scroll-jump button + button{border-top:1px solid var(--rule-soft)}
+  .scroll-jump button:hover{color:var(--accent);background:color-mix(in srgb, var(--accent) 8%, transparent)}
+  .scroll-jump button:disabled{opacity:.3;cursor:not-allowed}
+  .scroll-jump button:disabled:hover{color:var(--ink-soft);background:transparent}
+  @media (max-width:620px){
+    .scroll-jump{bottom:16px;right:14px}
+    .scroll-jump button{width:36px;height:36px}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none!important;scroll-behavior:auto!important}
+  }
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="bar-inner">
+    <div class="wordmark">Seoul &amp; Tokyo<span class="dot">.</span> <span style="color:var(--ink-faint);font-size:14px">Jul 2026</span></div>
+    <div class="header-day empty" id="headerDayInfo">Select a day to view its region.</div>
+    <div class="bar-spacer"></div>
+    <div class="toggle" role="tablist" aria-label="Country">
+      <button role="tab" data-c="kr" aria-selected="true"><span class="swatch"></span>South Korea</button>
+      <button role="tab" data-c="jp" aria-selected="false"><span class="swatch"></span>Japan</button>
+    </div>
+    <div class="today-pill" id="todayPill">—</div>
+  </div>
+</header>
+
+<nav class="day-strip" aria-label="Days">
+  <div class="day-strip-inner" id="dayStrip"></div>
+</nav>
+
+<section class="hero">
+  <p class="eyebrow">Where you are today</p>
+  <div class="today-card">
+    <div class="today-grid">
+      <div class="today-status" id="todayStatus"></div>
+      <div class="today-detail" id="todayDetail"></div>
+    </div>
+  </div>
+</section>
+
+<!-- KOREA -->
+<section class="panel active" id="panel-kr" data-c="kr">
+  <div class="panel-head">
+    <h2>South Korea</h2>
+    <div class="ph-rule"></div>
+    <div class="ph-meta" id="meta-kr"></div>
+  </div>
+  <div class="ph-filter" id="filter-kr" role="tablist" aria-label="Filter stops"></div>
+  <div class="layout">
+    <div class="map-wrap">
+      <div class="map-shell">
+        <div class="map-el" id="map-kr"></div>
+        <div class="map-cap"><span class="dotk"></span><span id="cap-kr">Select a day to focus the map.</span></div>
+      </div>
+    </div>
+    <div class="days" id="days-kr"></div>
+  </div>
+</section>
+
+<!-- JAPAN -->
+<section class="panel" id="panel-jp" data-c="jp">
+  <div class="panel-head">
+    <h2>Japan</h2>
+    <div class="ph-rule"></div>
+    <div class="ph-meta" id="meta-jp"></div>
+  </div>
+  <div class="ph-filter" id="filter-jp" role="tablist" aria-label="Filter stops"></div>
+  <div class="callout">
+    <h3>Critical flags — read first</h3>
+    <ul>
+      <li><b>Reserve the Day 6 N'EX</b> (7:45 PM Shibuya → Narita, the last train). N'EX has no unreserved seats — no booking, no boarding.</li>
+      <li><b>Marine Day weekend</b> begins Sat 18 Jul — trains and Narita are busier than usual.</li>
+      <li><b>Day 7 flight is 8:20 AM</b> — be at the airport by ~6:30 AM, bag drop closes ~7:20 AM. First hotel shuttle ~5:00–5:30 AM. Confirm the timetable at check-in.</li>
+      <li><b>Bring your passport</b> for tax-free: JINS, Kitamura, Itoya, Akihabara RAILYARD, Gallery 2. Several yakitori spots &amp; the batting centre are <b>cash only</b>.</li>
+      <li><b>Closures:</b> museums shut Mondays; Sea Life Park &amp; E-Chan ramen shut Wednesdays; hanko shop shut Thu/Fri. The current plan threads all of these.</li>
+    </ul>
+  </div>
+
+  <div class="layout">
+    <div class="map-wrap">
+      <div class="map-shell">
+        <div class="map-el" id="map-jp"></div>
+        <div class="map-cap"><span class="dotk"></span><span id="cap-jp">Select a day to focus the map.</span></div>
+      </div>
+    </div>
+    <div class="days" id="days-jp"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="foot">
+    <div>
+      <h4>Transport &amp; money</h4>
+      <ul>
+        <li><b>Korea</b> — AREX ICN↔Seoul (~50 min in / ~43 min out); KTX Seoul↔Daejeon (~50 min, book korail.com). T-money for everything else.</li>
+        <li><b>Japan</b> — N'EX Narita↔Shibuya (~75 min, ¥3,250 ea; round-trip ¥5,000 with a foreign passport). Tokyu Shibuya↔Miyamaedaira ~¥280. Suica/Pasmo + pocket WiFi.</li>
+        <li><b>Rate ref</b> — RM1 ≈ ¥40 (~RM0.025/yen). Korea figures in MYR were drawn separately — verify live rates before paying.</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Still to confirm</h4>
+      <ul>
+        <li>MSI Finals — exact venue + start time from the ticket (Sun 12 Jul, Daejeon).</li>
+        <li>Reserve N'EX seats for Day 6, ideally paired with Day 1 as a round trip.</li>
+        <li>Reserve Tokiwatei (Day 2 dinner) &amp; buy Tokyo National Museum tickets online (Day 3).</li>
+        <li>MyStays Premier Narita — first-morning shuttle time + last-night airport→hotel shuttle time.</li>
+        <li>Day 5 — decide hill shrines vs Enoshima coast (the day won't fit both).</li>
+      </ul>
+    </div>
+    <p class="fc">Times are local to each destination. The “today” panel reads your device's date — append <span style="font-family:var(--mono)">?date=2026-07-11</span> to the address to preview any day. Map data © OpenStreetMap contributors, tiles © CARTO.</p>
+  </div>
+</footer>
+
+<div class="scroll-jump" id="scrollJump" aria-hidden="true">
+  <button type="button" data-jump="top" aria-label="Scroll to top" title="Top">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 12V4M4 7l4-3 4 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <button type="button" data-jump="bottom" aria-label="Scroll to bottom" title="Bottom">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 4v8M4 9l4 3 4-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+/* ============================ DATA ============================ */
+const TRIP = {
+  kr: {
+    accent:'#d49a78', soft:'#2c1d14',
+    days:[
+      { id:'kr1', date:'2026-07-10', dow:'Fri', title:'Arrival + Work Day', area:'Jongno, Seoul',
+        stops:[
+          {n:'Incheon Airport',lat:37.4602,lng:126.4407},
+          {n:'Eight Rest Hostel, Jongno',lat:37.5710,lng:126.9910},
+          {n:'Insadong-gil',lat:37.5740,lng:126.9850},
+          {n:'Gwangjang Market',lat:37.5701,lng:126.9996},
+        ],
+        blocks:[
+          {t:'7:00 AM', x:'<b>Incheon Airport</b> — AREX to Seoul (~50 min). Pick up T-money + pocket WiFi.', major:true},
+          {t:'8:30 AM', x:'Drop luggage at <b>Eight Rest Hostel</b>, Jongno (233-1).'},
+          {t:'10 AM–7 PM', x:'<b>Work from a café</b> — Namusairo Coffee.<span class="sub"> Opens 7:30 AM, closes 8:30 PM; quiet, fast WiFi.</span>', major:true},
+          {t:'1–3 PM', x:'<b>Mandu lunch</b> — Gaeseong Traditional Dumpling House (Insadong) or Bukchon Son-mandu.', chips:[{k:'warn',l:'Gaeseong closes 3 PM, reopens 4'},{k:'note',l:'Bukchon till 7:30 PM'}]},
+          {t:'7:15 PM', x:'<b>Dinner</b> around Jongno.'},
+          {t:'8:00 PM', x:'<b>Insadong-gil + Ssamzigil</b>, then Gwangjang Market.', chips:[{k:'warn',l:'Ssamzigil closes 8:30 PM'},{k:'note',l:'Gwangjang till 10:30 PM'}]},
+          {t:'9:00 PM', x:'<b>Jongno 3-ga Pocha Street</b> — pojangmacha, 5 min from the hostel.', major:true},
+        ]},
+      { id:'kr2', date:'2026-07-11', dow:'Sat', title:'Seoul — the big loop', area:'Jongno → Seongsu → Gangnam → Namsan → Hongdae',
+        stops:[
+          {n:'Cheonggyecheon',lat:37.5696,lng:126.9784},
+          {n:'Gyeongbokgung',lat:37.5796,lng:126.9770},
+          {n:'Musinsa Seongsu',lat:37.5443,lng:127.0557},
+          {n:'T1 Café & Arena, Gangnam',lat:37.5045,lng:127.0490},
+          {n:'Starfield Library, COEX',lat:37.5128,lng:127.0590},
+          {n:'N Seoul Tower',lat:37.5512,lng:126.9882},
+          {n:'T1 Base Camp, Hongdae',lat:37.5563,lng:126.9236},
+        ],
+        blocks:[
+          {t:'7:30 AM', x:'<b>Run</b> along Cheonggyecheon stream (1 hr) — flat, lit, 24/7.', major:true},
+          {t:'9:00 AM', x:'Check out of Eight Rest; move luggage to <b>Brown Suites</b>.'},
+          {t:'10:30 AM', x:'<b>Cheongsudang Bakery</b>, Iksundong.', chips:[{k:'note',l:'10:30 AM – 8 PM'}]},
+          {t:'11:00 AM', x:'<b>Insadong Culture Street</b>.'},
+          {t:'12:30 PM', x:'<b>Gyeongbokgung Palace</b>.', major:true, chips:[{k:'warn',l:'closes 5 PM · shut Tue'}]},
+          {t:'2:00 PM', x:'<b>Kim Gyeongja Wonjo Sonkal Guksu</b>, Seongdong — kalguksu + bossam.', chips:[{k:'warn',l:'closes 9 PM · CLOSED SUN'}]},
+          {t:'2:45 PM', x:'<b>Musinsa Megastore Seongsu</b> — shopping.', chips:[{k:'note',l:'till 10 PM'}]},
+          {t:'3:30 PM', x:'<b>T1 Café &amp; Arena</b>, Gangnam.', major:true, chips:[{k:'warn',l:'closes 8 PM · CLOSED SUN'}]},
+          {t:'4:30 PM', x:'<b>Starfield Library</b>, COEX Mall.', chips:[{k:'note',l:'till 10 PM'}]},
+          {t:'5:30 PM', x:'<b>Samwon Garden</b> KBBQ, Gangnam.', chips:[{k:'reserve',l:'book ahead · 9 PM Sat'}]},
+          {t:'7:30 PM', x:'<b>N Seoul Tower / Namsan</b> — bibimbap at the cable-car base.', major:true, chips:[{k:'note',l:'11 PM Sat'}]},
+          {t:'9:00 PM', x:'<b>Myeongdong</b> — skincare browse. <span class="sub">Don\'t eat here.</span>'},
+          {t:'10:00 PM', x:'<b>T1 Base Camp</b>, Hongdae — PC bang + merch, tax refund inside.', major:true, chips:[{k:'note',l:'24/7'}]},
+        ]},
+      { id:'kr3', date:'2026-07-12', dow:'Sun', title:'Seoul → Daejeon (MSI day)', area:'Inwangsan → Gangnam → Daejeon',
+        stops:[
+          {n:'Inwangsan trailhead',lat:37.5816,lng:126.9590},
+          {n:'Pro Soy Crab, Gangnam',lat:37.5046,lng:127.0490},
+          {n:'Seoul Station',lat:37.5547,lng:126.9707},
+          {n:'Expo Science Park, Daejeon',lat:36.3745,lng:127.3886},
+          {n:'Daejeon Station',lat:36.3315,lng:127.4347},
+        ],
+        blocks:[
+          {t:'6:00 AM', x:'<b>Scenic 7-Eleven</b> (Inwangsan-ro, Sajik) — Namsan view, trail snacks.', chips:[{k:'note',l:'24/7'}]},
+          {t:'6:30 AM', x:'<b>Inwangsan hike</b> — starts right behind the 7-Eleven.', major:true},
+          {t:'9:30 AM', x:'<b>Brown Suites</b> — shower, check out.'},
+          {t:'10:30 AM', x:'<b>Pro Soy Crab</b>, Gangnam — raw marinated crab.', chips:[{k:'note',l:'till 11 PM'}]},
+          {t:'12:30 PM', x:'<b>Seoul Station → KTX to Daejeon</b> (~50 min).', major:true, chips:[{k:'reserve',l:'book korail.com'}]},
+          {t:'1:45 PM', x:'<b>Daejeon Yuseong Nakwon Onsen Hotel</b> — check in, drop bags.'},
+          {t:'3:00 PM', x:'<b>Fan Festa</b> — Hanbit Plaza, Expo Science Park (Yuseong).', major:true, chips:[{k:'note',l:'runs 3–8 PM · stay 1.5–2 hr'}]},
+          {t:'6:00 PM', x:'<b>MSI Finals.</b>', major:true, chips:[{k:'reserve',l:'confirm venue + start from ticket'}]},
+          {t:'Late', x:'After-party / Daejeon nightlife.'},
+        ]},
+      { id:'kr4', date:'2026-07-13', dow:'Mon', title:'Daejeon → Incheon (Departure)', area:'Daejeon → Seoul → Incheon',
+        stops:[
+          {n:'Daejeon Station',lat:36.3315,lng:127.4347},
+          {n:'Seoul Station',lat:37.5547,lng:126.9707},
+          {n:'Incheon Airport',lat:37.4602,lng:126.4407},
+        ],
+        blocks:[
+          {t:'7:00 AM', x:'Check out of the Daejeon hotel.'},
+          {t:'7:30 AM', x:'<b>Daejeon Station → KTX to Seoul</b> (~50 min).', major:true},
+          {t:'9:15 AM', x:'<b>Seoul Station → AREX Express to Incheon T1</b> (~43 min).', major:true},
+          {t:'10:45 AM', x:'<b>Incheon Airport</b> — check in &amp; clear security.', chips:[{k:'warn',l:'be here by 10:45 AM'}]},
+          {t:'12:55 PM', x:'<b>Departure to Japan.</b>', major:true},
+        ]},
+    ]
+  },
+  jp: {
+    accent:'#94b3c4', soft:'#172530',
+    days:[
+      { id:'jp1', date:'2026-07-13', dow:'Mon', title:'Arrive + settle', area:'Narita → Shibuya → Miyamaedaira',
+        stops:[
+          {n:'Narita Airport',lat:35.7720,lng:140.3929},
+          {n:'Shibuya',lat:35.6595,lng:139.7005},
+          {n:'Miyamaedaira (home base)',lat:35.5876,lng:139.5710},
+        ],
+        blocks:[
+          {t:'3:30 PM', x:'<b>Land Narita.</b> Immigration + baggage + customs ~45–60 min.', major:true},
+          {t:'At airport', x:'Pocket WiFi; set up Suica/Pasmo (or Welcome Suica).'},
+          {t:'~5:00 PM', x:'<b>N\'EX Narita → Shibuya</b> (~75 min).', major:true, chips:[{k:'note',l:'round-trip ¥5,000 — buy on arrival'}]},
+          {t:'~6:15 PM', x:'Shibuya → <b>Tokyu Den-en-toshi Line → Miyamaedaira</b> (24 min).'},
+          {t:'~6:50 PM', x:'<b>Home.</b> Drop bags, freshen up.'},
+          {t:'Evening', x:'Dinner in Jiyugaoka (La Vita) or near home. Early night.'},
+        ]},
+      { id:'jp2', date:'2026-07-14', dow:'Tue', title:'Shinjuku + Kabukicho', area:'Shinjuku (west side)',
+        stops:[
+          {n:'JINS Shinjuku flagship',lat:35.6915,lng:139.7036},
+          {n:'Tokyo Metropolitan Gov Bldg',lat:35.6896,lng:139.6917},
+          {n:'Kabukicho',lat:35.6949,lng:139.7028},
+          {n:'Omoide Yokocho',lat:35.6932,lng:139.6995},
+        ],
+        blocks:[
+          {t:'Morning', x:'Café in Shinjuku.'},
+          {t:'10:30 AM', x:'<b>JINS Shinjuku flagship</b> — eye test, glasses in ~30 min.', major:true, chips:[{k:'note',l:'passport · tax-free'}]},
+          {t:'Late AM', x:'<b>Kitamura Camera</b> flagship — 7 floors.', chips:[{k:'note',l:'passport · tax-free'}]},
+          {t:'Midday', x:'<b>Tokyo Met Gov observation deck</b> (free) + Uniqlo/GU flagship.'},
+          {t:'Sunset', x:'Met Bldg deck at sunset if missed earlier.'},
+          {t:'Dinner', x:'<b>Kabukicho</b> — Tokiwatei (0-sec lemon sour + yakiniku) or Jingisukan lamb BBQ.', major:true, chips:[{k:'reserve',l:'reserve Tokiwatei ahead'}]},
+          {t:'Evening', x:'<b>Omoide Yokocho</b> yakitori alley.', chips:[{k:'note',l:'~4 PM–midnight · some cash only'}]},
+          {t:'After 12', x:'<b>Torikizoku Kabukicho</b> (to 4 AM) or Gekibutori (24h).', chips:[{k:'note',l:'cash for some'}]},
+          {t:'To 4 AM', x:'<b>Shinjuku Batting Center</b> — ¥300/25 pitches.', major:true, chips:[{k:'warn',l:'cash only'}]},
+        ]},
+      { id:'jp3', date:'2026-07-15', dow:'Wed', title:'Museums + old town', area:'Ueno → Kappabashi → Asakusa → Yanaka',
+        stops:[
+          {n:'Tokyo National Museum, Ueno',lat:35.7188,lng:139.7766},
+          {n:'Kappabashi Kitchen St',lat:35.7140,lng:139.7900},
+          {n:'Senso-ji, Asakusa',lat:35.7148,lng:139.7967},
+          {n:'Yanaka Ginza',lat:35.7276,lng:139.7660},
+        ],
+        blocks:[
+          {t:'Morning', x:'Café in Ueno.'},
+          {t:'9:30 AM', x:'<b>Tokyo National Museum</b> — buy online to skip the queue.', major:true, chips:[{k:'warn',l:'¥1,000 · CLOSED Mon'}]},
+          {t:'Midday', x:'Ueno Park walk → <b>Kappabashi Kitchen Street</b> (~10 min).'},
+          {t:'Afternoon', x:'<b>Senso-ji / Asakusa</b> browse.'},
+          {t:'Late PM', x:'<b>Yanaka Ginza</b> + Shinimonogurui hanko stamp shop.', major:true, chips:[{k:'warn',l:'hanko open Wed only (shut Thu/Fri)'}]},
+          {t:'Sunset', x:'Yuyake Dandan sunset stairs, street snacks. Home via Shibuya.'},
+        ]},
+      { id:'jp4', date:'2026-07-16', dow:'Thu', title:'Free & easy (split day)', area:'Kasai / Akihabara  •  Kichijoji / Daikanyama',
+        stops:[
+          {n:'E-Chan ramen, Fudo-mae',lat:35.6243,lng:139.7156},
+          {n:'Tokyo Sea Life Park, Kasai',lat:35.6406,lng:139.8632},
+          {n:'Akihabara RAILYARD',lat:35.6984,lng:139.7731},
+          {n:'Kichijoji / Inokashira',lat:35.7022,lng:139.5803},
+          {n:'Daikanyama T-Site',lat:35.6485,lng:139.7030},
+          {n:'Kagurazaka',lat:35.7016,lng:139.7405},
+        ],
+        blocks:[
+          {t:'6:30 AM', x:'<b>Asa ramen</b> — E-Chan Shokudo, Fudo-mae. Queue early, done ~8 AM.', major:true, chips:[{k:'warn',l:'6:30–11 AM · CLOSED Wed'}]},
+          {t:'A-track', x:'<b>Tokyo Sea Life Park</b> aquarium, Kasai.', chips:[{k:'warn',l:'¥700 · last entry 4 PM · shut Wed'}]},
+          {t:'A-track', x:'<b>Akihabara RAILYARD</b> — train-themed goods.', chips:[{k:'note',l:'passport · tax-free'}]},
+          {t:'B-track', x:'<b>Kichijoji</b> — Inokashira Park, Harmonica Yokocho.'},
+          {t:'B-track', x:'<b>Daikanyama T-Site</b> → Nakameguro canal walk.'},
+          {t:'B-eve', x:'<b>Kagurazaka</b> — geisha alleys, French bakeries (best after dark).', major:true},
+        ]},
+      { id:'jp5', date:'2026-07-17', dow:'Fri', title:'Kamakura + coast', area:'Kamakura → Hase → Enoshima',
+        stops:[
+          {n:'Hokokuji Bamboo Grove',lat:35.3206,lng:139.5640},
+          {n:'Tsurugaoka Hachimangu',lat:35.3258,lng:139.5563},
+          {n:'Kotoku-in Great Buddha',lat:35.3169,lng:139.5358},
+          {n:'Hase-dera',lat:35.3124,lng:139.5320},
+          {n:'Enoshima',lat:35.2996,lng:139.4805},
+        ],
+        blocks:[
+          {t:'Optional', x:'6:30 AM E-Chan asa ramen (open Fri) before heading out.'},
+          {t:'9–9:30 AM', x:'Miyamaedaira → Shibuya → <b>JR Shonan-Shinjuku → Kamakura</b> (~70 min).', major:true},
+          {t:'Morning', x:'<b>Hokokuji Bamboo Grove</b> — matcha cafe inside.', chips:[{k:'note',l:'9 AM · ¥500'}]},
+          {t:'Central', x:'<b>Tsurugaoka Hachimangu</b> (main shrine) + Komachi-dori lunch.', major:true},
+          {t:'West', x:'<b>Kotoku-in Great Buddha</b> + Hase-dera (sea views).'},
+          {t:'Coast', x:'Ride the <b>Enoden</b> west — Inamuragasaki sunset point, Shichirigahama, Slam Dunk crossing.'},
+          {t:'~6:50 PM', x:'<b>Enoshima</b> — Sea Candle for sunset + Enoshima Shrine. Dinner on the island.', major:true, chips:[{k:'warn',l:'EITHER coast OR hill shrines — not both'}]},
+        ]},
+      { id:'jp6', date:'2026-07-18', dow:'Sat', title:'Last day + Narita night', area:'Shibuya → Ginza → Togoshi → Narita',
+        stops:[
+          {n:'Gallery 2, Shibuya',lat:35.6618,lng:139.6995},
+          {n:'Itoya, Ginza',lat:35.6717,lng:139.7650},
+          {n:'Togoshi Ginza',lat:35.6113,lng:139.7156},
+          {n:'Miyamaedaira (bags)',lat:35.5876,lng:139.5710},
+          {n:'Narita Airport',lat:35.7720,lng:140.3929},
+        ],
+        blocks:[
+          {t:'Morning', x:'<b>Gallery 2</b> volleyball store, Shibuya.', chips:[{k:'note',l:'11 AM–8 PM · passport'}]},
+          {t:'Midday', x:'<b>Itoya Ginza</b> stationery — 12 floors.', chips:[{k:'note',l:'10 AM–8 PM Sat · passport'}]},
+          {t:'Afternoon', x:'<b>Togoshi Ginza</b> — longest shopping street, street food.', chips:[{k:'note',l:'skip first if running late'}]},
+          {t:'6:00–6:30 PM', x:'Back to <b>Miyamaedaira</b>, collect bags.', major:true},
+          {t:'7:00 PM', x:'Miyamaedaira → Shibuya with luggage (be there by 7:15 PM).', chips:[{k:'warn',l:'tight window'}]},
+          {t:'7:45 PM', x:'<b>LAST N\'EX Shibuya → Narita</b> (~75 min, arrives ~9:12 PM).', major:true, chips:[{k:'reserve',l:'reserved seats required'}]},
+          {t:'~9:30 PM', x:'Airport → <b>Hotel MyStays Premier Narita</b> — free shuttle (~15 min).', chips:[{k:'note',l:'confirm last run · taxi ¥2–3k backup'}]},
+        ]},
+      { id:'jp7', date:'2026-07-19', dow:'Sun', title:'Departure', area:'Narita',
+        stops:[ {n:'Narita Airport',lat:35.7720,lng:140.3929} ],
+        blocks:[
+          {t:'~4:30 AM', x:'Wake.'},
+          {t:'~5:30 AM', x:'<b>Hotel shuttle to airport</b> (first ~5:00–5:30 AM, no booking).', major:true, chips:[{k:'note',l:'confirm timetable at check-in'}]},
+          {t:'~6:00 AM', x:'At Narita. Bag drop closes ~7:20 AM; be checked in by ~6:30 AM.', chips:[{k:'warn',l:'don\'t cut it close'}]},
+          {t:'8:20 AM', x:'<b>Departure.</b>', major:true},
+        ]},
+    ]
+  }
+};
+/* ============================ HELPERS ============================ */
+const $=(s,r=document)=>r.querySelector(s);
+const fmtMonthDay=iso=>{const[y,m,d]=iso.split('-').map(Number);
+  return new Date(y,m-1,d).toLocaleDateString('en-US',{month:'short',day:'numeric'});};
+function localToday(){
+  const q=new URLSearchParams(location.search).get('date');
+  if(q && /^\d{4}-\d{2}-\d{2}$/.test(q)){const[y,m,d]=q.split('-').map(Number);return new Date(y,m-1,d);}
+  const n=new Date();return new Date(n.getFullYear(),n.getMonth(),n.getDate());
+}
+const toISO=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const allDays=[...TRIP.kr.days.map(d=>({...d,c:'kr'})),...TRIP.jp.days.map(d=>({...d,c:'jp'}))];
+
+/* ============================ RENDER DAYS ============================ */
+const PLACES={
+  'Incheon Airport':'Incheon International Airport',
+  'Eight Rest Hostel':'Eight Rest Hostel Jongno Seoul',
+  'Insadong-gil + Ssamzigil':'Ssamzigil Insadong Seoul',
+  'Gwangjang Market':'Gwangjang Market Seoul',
+  'Jongno 3-ga Pocha Street':'Jongno 3-ga Pocha Street Seoul',
+  'Cheongsudang Bakery':'Cheongsudang Bakery Ikseondong Seoul',
+  'Insadong Culture Street':'Insadong-gil Seoul',
+  'Gyeongbokgung Palace':'Gyeongbokgung Palace Seoul',
+  'Kim Gyeongja Wonjo Sonkal Guksu':'Kim Gyeongja Wonjo Sonkal Guksu Seongdong Seoul',
+  'Musinsa Megastore Seongsu':'Musinsa Standard Seongsu Seoul',
+  'T1 Café &amp; Arena':'T1 Cafe Arena Gangnam Seoul',
+  'Starfield Library':'Starfield Library COEX Mall Seoul',
+  'Samwon Garden':'Samwon Garden Gangnam Seoul',
+  'N Seoul Tower / Namsan':'N Seoul Tower Namsan',
+  'T1 Base Camp':'T1 Base Camp Hongdae Seoul',
+  'Scenic 7-Eleven':'7-Eleven Inwangsan-ro Sajik Seoul',
+  'Inwangsan hike':'Inwangsan Mountain Seoul',
+  'Brown Suites':'Brown Suites Hotel Seoul',
+  'Pro Soy Crab':'Pro Ganjang Gejang Gangnam Seoul',
+  'Daejeon Yuseong Nakwon Onsen Hotel':'Yuseong Nakwon Onsen Hotel Daejeon',
+  'Fan Festa':'Hanbit Plaza Expo Science Park Daejeon',
+  'Daejeon Station':'Daejeon Station',
+  'Seoul Station':'Seoul Station',
+  'Land Narita':'Narita International Airport',
+  'JINS Shinjuku flagship':'JINS Shinjuku Flagship',
+  'Kitamura Camera':'Kitamura Camera Shinjuku',
+  'Tokyo Met Gov observation deck':'Tokyo Metropolitan Government Building Observation Deck',
+  'Tokiwatei':'Tokiwatei Kabukicho Shinjuku',
+  'Omoide Yokocho':'Omoide Yokocho Shinjuku',
+  'Torikizoku Kabukicho':'Torikizoku Kabukicho',
+  'Shinjuku Batting Center':'Shinjuku Batting Center',
+  'Tokyo National Museum':'Tokyo National Museum Ueno',
+  'Kappabashi Kitchen Street':'Kappabashi Kitchen Town Tokyo',
+  'Senso-ji / Asakusa':'Senso-ji Asakusa Tokyo',
+  'Yanaka Ginza':'Yanaka Ginza Tokyo',
+  'Tokyo Sea Life Park':'Tokyo Sea Life Park Kasai',
+  'Akihabara RAILYARD':'RAILYARD Akihabara',
+  'Daikanyama T-Site':'Daikanyama T-Site Tokyo',
+  'Hokokuji Bamboo Grove':'Hokokuji Temple Kamakura',
+  'Tsurugaoka Hachimangu':'Tsurugaoka Hachimangu Kamakura',
+  'Kotoku-in Great Buddha':'Kotoku-in Great Buddha Kamakura',
+  'Gallery 2':'Gallery 2 Volleyball Shibuya Tokyo',
+  'Itoya Ginza':'Itoya Ginza Tokyo',
+  'Togoshi Ginza':'Togoshi Ginza Shopping Street Tokyo',
+  'Hotel MyStays Premier Narita':'Hotel MyStays Premier Narita',
+};
+function autoLinkPlaces(html){
+  return html.replace(/<b>([^<]+)<\/b>/g,(m,name)=>{
+    const q=PLACES[name];
+    if(!q) return m;
+    const href=`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+    return `<a class="loc" href="${href}" target="_blank" rel="noopener">${m}</a>`;
+  });
+}
+function chipHTML(c){return `<span class="chip ${c.k}">${c.l}</span>`;}
+function blockHTML(b){
+  const chips=b.chips?`<div class="chips">${b.chips.map(chipHTML).join('')}</div>`:'';
+  return `<div class="stop${b.major?' major':''}"><div class="t">${b.t}</div><div class="x">${autoLinkPlaces(b.x)}${chips}</div></div>`;
+}
+function mapsLink(lat,lng){
+  return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+}
+function dayHTML(d,i,cKey){
+  const blocks=d.blocks.map(blockHTML).join('');
+  return `<article class="day" id="day-${d.id}" data-day="${d.id}" data-c="${cKey}" data-filter="all">
+    <button class="day-head" aria-expanded="false">
+      <span class="day-num">${i+1}</span>
+      <span class="dh-main">
+        <span class="dh-date">${d.dow} · ${fmtMonthDay(d.date)}</span>
+        <span class="dh-title">${d.title}</span>
+        <span class="dh-area">${d.area}</span>
+      </span>
+      <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="day-body"><div class="line">${blocks}</div></div>
+  </article>`;
+}
+function buildCountry(cKey){
+  const meta=TRIP[cKey], host=$('#days-'+cKey);
+  host.innerHTML=meta.days.map((d,i)=>dayHTML(d,i,cKey)).join('');
+  const first=meta.days[0].date, last=meta.days[meta.days.length-1].date;
+  $('#meta-'+cKey).textContent=`${fmtMonthDay(first)} – ${fmtMonthDay(last)} · ${meta.days.length} days`;
+  host.querySelectorAll('.day').forEach(el=>{
+    el.querySelector('.day-head').addEventListener('click',()=>{
+      const open=!el.classList.contains('open');
+      el.classList.toggle('open', open);
+      el.querySelector('.day-head').setAttribute('aria-expanded', open?'true':'false');
+      el.dataset.userClosed = open ? 'false' : 'true';
+      selectDay(cKey, el.dataset.day);
+    });
+  });
+  buildFilter(cKey);
+}
+
+/* ---------- ensureDayOpen — respects manual user collapse; never closes others ---------- */
+function ensureDayOpen(cKey, dayId){
+  const el=document.getElementById('day-'+dayId);
+  if(!el || el.classList.contains('open')) return;
+  if(el.dataset.userClosed==='true') return;       /* respect explicit user collapse */
+  el.classList.add('open');
+  el.querySelector('.day-head').setAttribute('aria-expanded', 'true');
+}
+/* explicit user navigation overrides the user-closed flag */
+function forceOpenDay(cKey, dayId){
+  const el=document.getElementById('day-'+dayId);
+  if(!el) return;
+  el.dataset.userClosed='false';
+  if(!el.classList.contains('open')){
+    el.classList.add('open');
+    el.querySelector('.day-head').setAttribute('aria-expanded', 'true');
+  }
+}
+
+/* ---------- scroll suppression (silences observer during programmatic scrolls) ---------- */
+let _suppressUntil=0;
+function suppressScrollSync(ms){ _suppressUntil=Date.now()+(ms||900); }
+
+/* ---------- filter ---------- */
+function countChips(cKey, kind){
+  let n=0;
+  TRIP[cKey].days.forEach(d=>d.blocks.forEach(b=>{
+    if(!kind) n++;
+    else if(b.chips && b.chips.some(c=>c.k===kind)) n++;
+  }));
+  return n;
+}
+function buildFilter(cKey){
+  const el=document.getElementById('filter-'+cKey);
+  if(!el) return;
+  const total=countChips(cKey,null);
+  const r=countChips(cKey,'reserve');
+  const w=countChips(cKey,'warn');
+  el.innerHTML=`
+    <span class="pf-label">Show</span>
+    <button type="button" data-filter="all" class="active" aria-pressed="true">All<span class="count">${total}</span></button>
+    <button type="button" data-filter="reserve" aria-pressed="false"><span class="swatch"></span>Reserve<span class="count">${r}</span></button>
+    <button type="button" data-filter="warn" aria-pressed="false"><span class="swatch"></span>Warn<span class="count">${w}</span></button>
+  `;
+  el.addEventListener('click',e=>{
+    const btn=e.target.closest('button[data-filter]');
+    if(!btn) return;
+    const f=btn.dataset.filter;
+    el.querySelectorAll('button').forEach(b=>{
+      const on=b===btn;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-pressed', on?'true':'false');
+    });
+    document.querySelectorAll('#days-'+cKey+' .day').forEach(d=>d.dataset.filter=f);
+    /* if current selection got hidden, jump to first visible day */
+    const cur=document.getElementById('day-'+selected[cKey]);
+    if(!cur || cur.offsetParent===null){
+      const firstVisible=Array.from(document.querySelectorAll('#days-'+cKey+' .day'))
+        .find(d=>d.offsetParent!==null);
+      if(firstVisible){
+        suppressScrollSync(900);
+        forceOpenDay(cKey, firstVisible.dataset.day);
+        selectDay(cKey, firstVisible.dataset.day);
+        firstVisible.scrollIntoView({behavior:'smooth', block:'start'});
+      }
+    }
+  });
+}
+function resetFilter(cKey){
+  const el=document.getElementById('filter-'+cKey);
+  if(!el) return;
+  el.querySelectorAll('button').forEach(b=>{
+    const on=b.dataset.filter==='all';
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-pressed', on?'true':'false');
+  });
+  document.querySelectorAll('#days-'+cKey+' .day').forEach(d=>d.dataset.filter='all');
+}
+
+/* ---------- day strip ---------- */
+function buildDayStrip(){
+  const strip=document.getElementById('dayStrip');
+  const mk=(cKey)=>TRIP[cKey].days.map((d,i)=>
+    `<button class="ds-pill" type="button" data-c="${cKey}" data-day="${d.id}" title="${d.dow} ${fmtMonthDay(d.date)} · ${d.title}">${i+1}</button>`
+  ).join('');
+  strip.innerHTML=`
+    <div class="ds-group"><span class="ds-label">Korea</span>${mk('kr')}</div>
+    <span class="ds-sep"></span>
+    <div class="ds-group"><span class="ds-label">Japan</span>${mk('jp')}</div>
+  `;
+  strip.addEventListener('click',e=>{
+    const btn=e.target.closest('.ds-pill');
+    if(!btn) return;
+    const c=btn.dataset.c, id=btn.dataset.day;
+    const dayEl=document.getElementById('day-'+id);
+    if(dayEl && dayEl.offsetParent===null) resetFilter(c);
+    suppressScrollSync(900);
+    setCountry(c, false, id);
+    if(dayEl) dayEl.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+}
+function updateDayStripActive(cKey, dayId, opts){
+  opts=opts||{};
+  const strip=document.getElementById('dayStrip');
+  if(!strip) return;
+  let activePill=null;
+  strip.querySelectorAll('.ds-pill').forEach(p=>{
+    const on=p.dataset.c===cKey && p.dataset.day===dayId;
+    p.classList.toggle('active', on);
+    if(on) activePill=p;
+  });
+  if(activePill && opts.scrollStrip){
+    const sLeft=strip.scrollLeft, sW=strip.offsetWidth;
+    const pLeft=activePill.offsetLeft, pW=activePill.offsetWidth;
+    if(pLeft<sLeft+24 || pLeft+pW>sLeft+sW-24){
+      strip.scrollTo({left: Math.max(0, pLeft - sW/2 + pW/2), behavior:'smooth'});
+    }
+  }
+}
+
+/* ---------- bar height tracker ---------- */
+function updateBarHeight(){
+  const bar=document.querySelector('header.bar');
+  if(!bar) return;
+  document.documentElement.style.setProperty('--bar-h', bar.offsetHeight+'px');
+}
+
+/* ============================ MAPS ============================ */
+const MAPS={}; let selected={kr:null,jp:null};
+function initMap(cKey){
+  if(MAPS[cKey]) {MAPS[cKey].map.invalidateSize(); return;}
+  const meta=TRIP[cKey];
+  const map=L.map('map-'+cKey,{zoomControl:true,scrollWheelZoom:false,attributionControl:false})
+    .setView([36.5,128],6);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+    maxZoom:19,subdomains:'abcd'
+  }).addTo(map);
+  L.control.attribution({prefix:false}).addTo(map).addAttribution('© OpenStreetMap, © CARTO');
+  MAPS[cKey]={map,layers:{}};
+  // build per-day marker groups + routes
+  meta.days.forEach(d=>{
+    const group=L.layerGroup();
+    const pts=d.stops.map(s=>[s.lat,s.lng]);
+    const line=L.polyline(pts,{color:meta.accent,weight:2.6,opacity:.75,dashArray:'4 6',lineCap:'round'});
+    group.addLayer(line);
+    d.stops.forEach((s,idx)=>{
+      const icon=L.divIcon({
+        className:'day-pin',
+        html:`<span class="pin"></span><span class="pin-label">${idx+1}</span>`,
+        iconSize:[18,30],
+        iconAnchor:[9,30],
+        popupAnchor:[0,-32]
+      });
+      const m=L.marker([s.lat,s.lng],{icon}).bindPopup(`<b>${idx+1}.</b> ${s.n}<br><a href="${mapsLink(s.lat,s.lng)}" target="_blank" rel="noopener">Open in Google Maps</a>`);
+      group.addLayer(m);
+    });
+    MAPS[cKey].layers[d.id]={group, bounds:L.latLngBounds(pts)};
+  });
+}
+function selectDay(cKey,dayId,opts){
+  opts=opts||{};
+  const M=MAPS[cKey]; if(!M) return;
+  /* highlight only — does NOT change open/closed state of any day */
+  // map highlight
+  Object.entries(M.layers).forEach(([id,L0])=>{
+    M.map.removeLayer(L0.group);
+  });
+  const cur=M.layers[dayId];
+  cur.group.addTo(M.map);
+  try{ M.map.fitBounds(cur.bounds.pad(0.35),{maxZoom:13,animate:!opts.fromScroll}); }catch(e){}
+  // caption
+  const day=TRIP[cKey].days.find(d=>d.id===dayId);
+  $('#cap-'+cKey).textContent=`${day.dow} · ${day.area}`;
+  // header info
+  const dayNumber=TRIP[cKey].days.findIndex(d=>d.id===dayId)+1;
+  const tag=cKey==='kr'?'KR':'JP';
+  const hdr=$('#headerDayInfo');
+  hdr.classList.remove('empty');
+  hdr.innerHTML=`<span class="hd-meta">${tag} · Day ${dayNumber} · ${day.dow} ${fmtMonthDay(day.date)}</span><span class="hd-title">${day.title}</span><span class="hd-area">${day.area}</span>`;
+  // card state
+  document.querySelectorAll('#days-'+cKey+' .day').forEach(el=>{
+    el.classList.toggle('sel', el.dataset.day===dayId);
+  });
+  selected[cKey]=dayId;
+  updateDayStripActive(cKey, dayId, {scrollStrip: !opts.fromScroll});
+}
+
+/* ============================ SCROLL SYNC ============================ */
+let _scrollRAF=false;
+function updateActiveOnScroll(){
+  if(Date.now()<_suppressUntil) return;
+  const activePanel=document.querySelector('.panel.active');
+  if(!activePanel) return;
+  const cKey=activePanel.dataset.c;
+  const days=activePanel.querySelectorAll('.day');
+  if(!days.length) return;
+  const bar=document.querySelector('header.bar');
+  const strip=document.querySelector('.day-strip');
+  const threshold=(bar?bar.offsetHeight:64)+(strip?strip.offsetHeight:0)+20;
+  let active=null;
+  for(const day of days){
+    if(day.offsetParent===null) continue;        /* skip filter-hidden */
+    const top=day.getBoundingClientRect().top;
+    if(top-threshold<=0) active=day; else break;
+  }
+  if(active && selected[cKey]!==active.dataset.day){
+    ensureDayOpen(cKey, active.dataset.day);
+    selectDay(cKey, active.dataset.day, {fromScroll:true});
+  }
+}
+
+const scrollJump=document.getElementById('scrollJump');
+const scrollJumpTop=scrollJump.querySelector('[data-jump="top"]');
+const scrollJumpBottom=scrollJump.querySelector('[data-jump="bottom"]');
+function updateScrollJump(){
+  const y=window.scrollY;
+  const max=document.documentElement.scrollHeight-window.innerHeight;
+  const shown=y>240;
+  scrollJump.classList.toggle('show',shown);
+  scrollJump.setAttribute('aria-hidden', shown?'false':'true');
+  scrollJumpTop.disabled=y<8;
+  scrollJumpBottom.disabled=y>=max-8;
+}
+scrollJump.addEventListener('click',e=>{
+  const btn=e.target.closest('button[data-jump]');
+  if(!btn) return;
+  const target=btn.dataset.jump==='top'?0:document.documentElement.scrollHeight;
+  suppressScrollSync(1200);
+  window.scrollTo({top:target,behavior:'smooth'});
+});
+
+window.addEventListener('scroll',()=>{
+  if(_scrollRAF) return;
+  _scrollRAF=true;
+  requestAnimationFrame(()=>{_scrollRAF=false;updateActiveOnScroll();updateScrollJump();});
+},{passive:true});
+updateScrollJump();
+
+/* ============================ COUNTRY TABS ============================ */
+function setCountry(cKey, doScroll, initDayId){
+  const isSwitch=document.querySelector('.panel.active')?.dataset?.c!==cKey;
+  document.querySelectorAll('.toggle button').forEach(b=>b.setAttribute('aria-selected', b.dataset.c===cKey));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active', p.dataset.c===cKey));
+  document.documentElement.style.setProperty('--accent', TRIP[cKey].accent);
+  document.documentElement.style.setProperty('--accent-soft', TRIP[cKey].soft);
+  initMap(cKey);
+  if(initDayId){
+    forceOpenDay(cKey, initDayId);
+    selectDay(cKey, initDayId);
+  } else if(isSwitch || !selected[cKey]){
+    const dayId=selected[cKey] || TRIP[cKey].days[0].id;
+    forceOpenDay(cKey, dayId);
+    selectDay(cKey, dayId);
+  }
+  if(doScroll){
+    const panel=document.querySelector('.panel.active');
+    if(panel){ suppressScrollSync(900); panel.scrollIntoView({behavior:'smooth', block:'start'}); }
+  }
+}
+document.querySelectorAll('.toggle button').forEach(btn=>{
+  btn.addEventListener('click',()=>setCountry(btn.dataset.c,true));
+});
+
+/* ============================ TODAY PANEL ============================ */
+function renderToday(){
+  const today=localToday(), iso=toISO(today);
+  $('#todayPill').textContent=today.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+  const first=allDays[0].date, last=allDays[allDays.length-1].date;
+  const matches=allDays.filter(d=>d.date===iso);
+  const statusEl=$('#todayStatus'), detailEl=$('#todayDetail');
+
+  function detailFor(d){
+    const cName=d.c==='kr'?'South Korea':'Japan';
+    const shown=d.blocks.slice(0,5);
+    const rows=shown.map(b=>`<div class="mini-row"><span class="mt">${b.t}</span><span class="mx">${b.x.replace(/<[^>]+>/g,'')}</span></div>`).join('');
+    const more=d.blocks.length>5?`<div class="mini-more">+ ${d.blocks.length-5} more stops below</div>`:'';
+    return `<div class="td-flag"><span class="swatch" style="background:var(--${d.c})"></span>${cName} · ${d.dow} ${fmtMonthDay(d.date)}</div>
+      <h3 class="today-title">${d.title}</h3>
+      <div class="today-area">${d.area}</div>
+      <div class="mini-timeline">${rows}${more}</div>
+      <button class="jump-btn" data-jump="${d.c}:${d.id}">Open full day →</button>`;
+  }
+
+  if(matches.length){
+    statusEl.innerHTML=`<div class="status-kicker">On the road</div>
+      <div class="status-big">Day ${dayIndexLabel(matches[0])}</div>
+      <div class="status-sub">of your ${tripLength()} across ${matches.length>1?'two countries today':'Korea &amp; Japan'}.</div>`;
+    detailEl.innerHTML=matches.map(detailFor).join('<hr style="border:0;border-top:1px solid var(--rule-soft);margin:22px 0">');
+    // default the country view to today's country and open today's day
+    setCountry(matches[0].c, false, matches[0].id);
+  } else if(iso<first){
+    const diff=Math.round((new Date(first.split('-').join('/'))-today)/864e5);
+    const d0=allDays[0];
+    statusEl.innerHTML=`<div class="status-kicker">Counting down</div>
+      <div class="status-big">${diff}<span class="unit"> ${diff===1?'day':'days'}</span></div>
+      <div class="status-sub">until you land in Seoul on ${fmtMonthDay(first)}.</div>`;
+    detailEl.innerHTML=`<div class="td-flag"><span class="swatch" style="background:var(--kr)"></span>First up · ${d0.dow} ${fmtMonthDay(d0.date)}</div>
+      <h3 class="today-title">${d0.title}</h3><div class="today-area">${d0.area}</div>
+      ${detailRows(d0)}<button class="jump-btn" data-jump="kr:${d0.id}">Open full day →</button>`;
+  } else {
+    statusEl.innerHTML=`<div class="status-kicker">Wheels down</div>
+      <div class="status-big">Home</div>
+      <div class="status-sub">${tripLength()}, two countries, one very full week.</div>`;
+    detailEl.innerHTML=`<h3 class="today-title">Trip complete</h3>
+      <div class="today-area">Seoul · Daejeon · Tokyo · Kamakura · Narita — browse the full record below.</div>
+      <button class="jump-btn" data-jump="kr:${allDays[0].id}">Revisit Day 1 →</button>`;
+  }
+  detailEl.querySelectorAll('.jump-btn').forEach(b=>{
+    b.addEventListener('click',()=>{
+      const[c,id]=b.dataset.jump.split(':');
+      suppressScrollSync(900);
+      setCountry(c, false, id);
+      const el=$('#day-'+id);
+      if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+    });
+  });
+}
+function detailRows(d){
+  const rows=d.blocks.slice(0,5).map(b=>`<div class="mini-row"><span class="mt">${b.t}</span><span class="mx">${b.x.replace(/<[^>]+>/g,'')}</span></div>`).join('');
+  const more=d.blocks.length>5?`<div class="mini-more">+ ${d.blocks.length-5} more stops</div>`:'';
+  return `<div class="mini-timeline">${rows}${more}</div>`;
+}
+function dayIndexLabel(d){ return allDays.filter((x,i)=>i<=allDays.indexOf(d)).length; }
+function tripLength(){
+  const first=allDays[0].date, last=allDays[allDays.length-1].date;
+  const n=Math.round((new Date(last.split('-').join('/'))-new Date(first.split('-').join('/')))/864e5)+1;
+  return `${n} days`;
+}
+
+/* ============================ BOOT ============================ */
+buildCountry('kr'); buildCountry('jp');
+buildDayStrip();
+updateBarHeight();
+if(window.ResizeObserver){
+  new ResizeObserver(updateBarHeight).observe(document.querySelector('header.bar'));
+}else{
+  window.addEventListener('resize', updateBarHeight);
+}
+setCountry('kr',false);
+renderToday();
+</script>
+</body>
+</html>
