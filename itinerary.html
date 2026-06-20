@@ -9,7 +9,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 
 <style>
   :root{
@@ -216,25 +215,28 @@
     font-size:12.5px;color:var(--ink-soft);display:flex;gap:9px;align-items:center;
   }
   .map-cap .dotk{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
-  .leaflet-container{font-family:var(--sans);background:#0d0b07}
-  .leaflet-popup-content-wrapper{
-    border-radius:9px;background:var(--paper);color:var(--ink);
-    border:1px solid var(--rule);box-shadow:var(--shadow);
+  .me-btn{
+    margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-soft);
+    border:1px solid var(--rule);background:var(--paper-2);border-radius:999px;
+    padding:4px 11px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+    transition:color .15s,border-color .15s,background .15s;flex-shrink:0;
   }
-  .leaflet-popup-tip{background:var(--paper);border:1px solid var(--rule)}
-  .leaflet-popup-content{margin:9px 13px;font-size:13px;color:var(--ink)}
-  .leaflet-popup-content a{color:var(--accent);text-decoration:none}
-  .leaflet-popup-content a:hover{text-decoration:underline}
-  .leaflet-container a.leaflet-popup-close-button{color:var(--ink-faint)}
-  .leaflet-container a.leaflet-popup-close-button:hover{color:var(--ink)}
-  .leaflet-bar a, .leaflet-bar a:hover{
-    background:var(--paper);color:var(--ink);border-bottom-color:var(--rule);
+  .me-btn:hover{color:var(--ink);border-color:var(--ink-soft)}
+  .me-btn .me-dot{width:8px;height:8px;border-radius:50%;background:#4aa3ff;box-shadow:0 0 0 3px rgba(74,163,255,.25)}
+  .me-btn[hidden]{display:none}
+  /* Google Maps surface + dark InfoWindow */
+  #map-kr,#map-jp{background:#0d0b07}
+  .gm-style .gm-style-iw-c{
+    background:var(--paper)!important;border:1px solid var(--rule)!important;
+    border-radius:10px!important;box-shadow:var(--shadow)!important;padding:0!important;
   }
-  .leaflet-bar a:hover{background:var(--paper-2)}
-  .leaflet-control-attribution{
-    background:rgba(var(--ivory-rgb),.75)!important;color:var(--ink-faint)!important;
-  }
-  .leaflet-control-attribution a{color:var(--ink-soft)!important}
+  .gm-style .gm-style-iw-d{overflow:hidden!important;background:var(--paper)!important}
+  .gm-style .gm-style-iw-tc::after{background:var(--paper)!important}
+  .gm-style .gm-style-iw-c button[aria-label]{filter:invert(.85)}
+  .gm-pop{font-family:var(--sans);font-size:13px;color:var(--ink);margin:9px 13px}
+  .gm-pop b{font-weight:600}
+  .gm-pop a{color:var(--accent);text-decoration:none}
+  .gm-pop a:hover{text-decoration:underline}
 
   /* day list */
   .days{display:flex;flex-direction:column;gap:16px}
@@ -268,12 +270,6 @@
 
   .day-body{display:none;padding:2px 20px 22px 20px}
   .day.open .day-body{display:block}
-
-  .day-pin{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;}
-  .day-pin .pin{
-    width:12px;height:12px;border-radius:50% 50% 50% 0;background:var(--accent);transform:rotate(-45deg);position:absolute;top:0;left:3px;box-shadow:0 0 0 2px rgba(255,255,255,.9), 0 0 0 3px rgba(0,0,0,.4);
-  }
-  .day-pin .pin-label{position:absolute;top:-6px;left:3.5px;font-size:9px;font-weight:700;color:#fff;letter-spacing:-.03em;}
 
   /* transit-spine timeline (signature) */
   .line{position:relative;padding-left:30px;margin-top:6px}
@@ -460,7 +456,7 @@
     <div class="map-wrap">
       <div class="map-shell">
         <div class="map-el" id="map-kr"></div>
-        <div class="map-cap"><span class="dotk"></span><span id="cap-kr">Select a day to focus the map.</span></div>
+        <div class="map-cap"><span class="dotk"></span><span id="cap-kr">Select a day to focus the map.</span><button class="me-btn" id="me-kr" type="button" hidden><span class="me-dot"></span>My location</button></div>
       </div>
     </div>
     <div class="days" id="days-kr"></div>
@@ -490,7 +486,7 @@
     <div class="map-wrap">
       <div class="map-shell">
         <div class="map-el" id="map-jp"></div>
-        <div class="map-cap"><span class="dotk"></span><span id="cap-jp">Select a day to focus the map.</span></div>
+        <div class="map-cap"><span class="dotk"></span><span id="cap-jp">Select a day to focus the map.</span><button class="me-btn" id="me-jp" type="button" hidden><span class="me-dot"></span>My location</button></div>
       </div>
     </div>
     <div class="days" id="days-jp"></div>
@@ -517,7 +513,7 @@
         <li>Day 5 — decide hill shrines vs Enoshima coast (the day won't fit both).</li>
       </ul>
     </div>
-    <p class="fc">Times are local to each destination. The “today” panel reads your device's date — append <span style="font-family:var(--mono)">?date=2026-07-11</span> to the address to preview any day. Map data © OpenStreetMap contributors, tiles © CARTO.</p>
+    <p class="fc">Times are local to each destination. The “today” panel reads your device's date — append <span style="font-family:var(--mono)">?date=2026-07-11</span> to the address to preview any day. Map © Google. The blue dot marks your current location (needs location permission); tap a numbered pin to mark a stop.</p>
   </div>
 </footer>
 
@@ -530,7 +526,6 @@
   </button>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 /* ============================ DATA ============================ */
 const TRIP = {
@@ -959,51 +954,167 @@ function updateBarHeight(){
   document.documentElement.style.setProperty('--bar-h', bar.offsetHeight+'px');
 }
 
-/* ============================ MAPS ============================ */
+/* ============================ MAPS (Google Maps) ============================ */
+/* Paste your Google Maps JavaScript API key below. Restrict it in Google Cloud
+   Console → Credentials → "Websites" (HTTP referrers) to your GitHub Pages URL
+   (e.g. https://YOURNAME.github.io/*) and to the "Maps JavaScript API". */
+const GMAPS_API_KEY='AIzaSyCrMVqPwd4wLSU81Xm6rYLUyZ54lKu_5T0';
+
 const MAPS={}; let selected={kr:null,jp:null};
-function initMap(cKey){
-  if(MAPS[cKey]) {MAPS[cKey].map.invalidateSize(); return;}
-  const meta=TRIP[cKey];
-  const map=L.map('map-'+cKey,{zoomControl:true,scrollWheelZoom:false,attributionControl:false})
-    .setView([36.5,128],6);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
-    maxZoom:19,subdomains:'abcd'
-  }).addTo(map);
-  L.control.attribution({prefix:false}).addTo(map).addAttribution('© OpenStreetMap, © CARTO');
-  MAPS[cKey]={map,layers:{}};
-  // build per-day marker groups + routes
-  meta.days.forEach(d=>{
-    const group=L.layerGroup();
-    const pts=d.stops.map(s=>[s.lat,s.lng]);
-    const line=L.polyline(pts,{color:meta.accent,weight:2.6,opacity:.75,dashArray:'4 6',lineCap:'round'});
-    group.addLayer(line);
-    d.stops.forEach((s,idx)=>{
-      const icon=L.divIcon({
-        className:'day-pin',
-        html:`<span class="pin"></span><span class="pin-label">${idx+1}</span>`,
-        iconSize:[18,30],
-        iconAnchor:[9,30],
-        popupAnchor:[0,-32]
-      });
-      const m=L.marker([s.lat,s.lng],{icon}).bindPopup(`<b>${idx+1}.</b> ${s.n}<br><a href="${mapsLink(s.lat,s.lng)}" target="_blank" rel="noopener">Open in Google Maps</a>`);
-      group.addLayer(m);
-    });
-    MAPS[cKey].layers[d.id]={group, bounds:L.latLngBounds(pts)};
-  });
+const SEL_COLOR='#ffcf6b';                 /* highlighted (clicked) stop */
+let LAST_POS=null;                          /* most recent geolocation fix */
+
+/* ---- async-load gate: map code may run before the Google script arrives ---- */
+let GMAPS_READY=false; const _mapQueue=[];
+function whenMapReady(fn){ if(GMAPS_READY) fn(); else _mapQueue.push(fn); }
+window.gmapsBoot=function(){ GMAPS_READY=true; _mapQueue.splice(0).forEach(fn=>{try{fn();}catch(e){}}); };
+
+const MAP_STYLE=[
+  {elementType:'geometry',stylers:[{color:'#15130d'}]},
+  {elementType:'labels.text.stroke',stylers:[{color:'#15130d'}]},
+  {elementType:'labels.text.fill',stylers:[{color:'#9a917f'}]},
+  {featureType:'administrative',elementType:'geometry',stylers:[{visibility:'off'}]},
+  {featureType:'administrative.locality',elementType:'labels.text.fill',stylers:[{color:'#c9c0ad'}]},
+  {featureType:'administrative.neighborhood',elementType:'labels',stylers:[{visibility:'off'}]},
+  {featureType:'poi',stylers:[{visibility:'off'}]},
+  {featureType:'road',elementType:'geometry',stylers:[{color:'#26221a'}]},
+  {featureType:'road',elementType:'geometry.stroke',stylers:[{visibility:'off'}]},
+  {featureType:'road',elementType:'labels.text.fill',stylers:[{color:'#7a7363'}]},
+  {featureType:'road.highway',elementType:'geometry',stylers:[{color:'#3a3326'}]},
+  {featureType:'transit',stylers:[{visibility:'off'}]},
+  {featureType:'water',elementType:'geometry',stylers:[{color:'#0c0a07'}]},
+  {featureType:'water',elementType:'labels.text.fill',stylers:[{color:'#4d4636'}]},
+];
+function escHTML(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function pinIcon(color, sel){
+  return {
+    path:'M12 0C6.5 0 2 4.5 2 10c0 6.6 10 18 10 18s10-11.4 10-18C22 4.5 17.5 0 12 0z',
+    fillColor:color, fillOpacity:1,
+    strokeColor:'#ffffff', strokeWeight:sel?2.4:1.2,
+    scale:sel?1.5:1.05,
+    anchor:new google.maps.Point(12,28),
+    labelOrigin:new google.maps.Point(12,10),
+  };
 }
-function selectDay(cKey,dayId,opts){
+function pinLabel(n, sel){ return {text:String(n),color:'#1c1a14',fontFamily:'Inter,sans-serif',fontSize:sel?'12px':'10px',fontWeight:'700'}; }
+
+function initMap(cKey){
+  if(!GMAPS_READY){ whenMapReady(()=>initMap(cKey)); return; }
+  if(MAPS[cKey]){ google.maps.event.trigger(MAPS[cKey].map,'resize'); return; }
+  const meta=TRIP[cKey];
+  const map=new google.maps.Map(document.getElementById('map-'+cKey),{
+    center:{lat:36.5,lng:128}, zoom:6,
+    styles:MAP_STYLE,
+    disableDefaultUI:true, zoomControl:true,
+    gestureHandling:'cooperative', clickableIcons:false,
+    backgroundColor:'#0d0b07', keyboardShortcuts:false,
+  });
+  const M={map, days:{}, me:null, info:new google.maps.InfoWindow(), sel:null};
+  MAPS[cKey]=M;
+  // build per-day routes + numbered markers (hidden until their day is selected)
+  meta.days.forEach(d=>{
+    const pts=d.stops.map(s=>({lat:s.lat,lng:s.lng}));
+    const dash={path:'M 0,-1 0,1',strokeOpacity:.75,strokeWeight:2.6,scale:2,strokeColor:meta.accent};
+    const polyline=new google.maps.Polyline({path:pts,strokeOpacity:0,clickable:false,
+      icons:[{icon:dash,offset:'0',repeat:'14px'}]});
+    const bounds=new google.maps.LatLngBounds();
+    const markers=d.stops.map((s,idx)=>{
+      bounds.extend({lat:s.lat,lng:s.lng});
+      const marker=new google.maps.Marker({
+        position:{lat:s.lat,lng:s.lng},
+        icon:pinIcon(meta.accent,false), label:pinLabel(idx+1,false),
+        zIndex:idx+1, title:s.n,
+      });
+      marker.addListener('click',()=>selectStop(cKey,d.id,idx));
+      return marker;
+    });
+    M.days[d.id]={polyline, markers, bounds};
+  });
+  // hook up the "My location" button for this map
+  const meBtn=document.getElementById('me-'+cKey);
+  if(meBtn) meBtn.addEventListener('click',()=>{
+    if(LAST_POS){ map.panTo(LAST_POS); map.setZoom(14); }
+  });
+  if(selected[cKey]) updateMapForDay(cKey, selected[cKey], {});
+  updateMyLocation(cKey);
+  ensureGeolocation();
+}
+
+/* show one day's route + markers, hide the rest, fit the view */
+function updateMapForDay(cKey,dayId,opts){
   opts=opts||{};
   const M=MAPS[cKey]; if(!M) return;
-  /* highlight only — does NOT change open/closed state of any day */
-  // map highlight
-  Object.entries(M.layers).forEach(([id,L0])=>{
-    M.map.removeLayer(L0.group);
+  clearSelStop(cKey);
+  M.info.close();
+  Object.values(M.days).forEach(L0=>{
+    L0.polyline.setMap(null);
+    L0.markers.forEach(m=>m.setMap(null));
   });
-  const cur=M.layers[dayId];
-  cur.group.addTo(M.map);
-  try{ M.map.fitBounds(cur.bounds.pad(0.35),{maxZoom:13,animate:!opts.fromScroll}); }catch(e){}
+  const cur=M.days[dayId]; if(!cur) return;
+  cur.polyline.setMap(M.map);
+  cur.markers.forEach(m=>m.setMap(M.map));
+  if(cur.markers.length<=1){
+    M.map.setCenter(cur.markers[0].getPosition()); M.map.setZoom(13);
+  } else {
+    M.map.fitBounds(cur.bounds,{top:48,right:48,bottom:48,left:48});
+  }
+}
+
+/* clicked-stop highlight */
+function selectStop(cKey,dayId,idx){
+  const M=MAPS[cKey]; if(!M) return;
+  clearSelStop(cKey);
+  const marker=M.days[dayId].markers[idx];
+  const s=TRIP[cKey].days.find(d=>d.id===dayId).stops[idx];
+  marker.setIcon(pinIcon(SEL_COLOR,true));
+  marker.setLabel(pinLabel(idx+1,true));
+  marker.setZIndex(9998);
+  M.sel={dayId,idx,marker};
+  M.info.setContent(`<div class="gm-pop"><b>${idx+1}.</b> ${escHTML(s.n)}<br><a href="${mapsLink(s.lat,s.lng)}" target="_blank" rel="noopener">Open in Google Maps</a></div>`);
+  M.info.open(M.map, marker);
+}
+function clearSelStop(cKey){
+  const M=MAPS[cKey]; if(!M||!M.sel) return;
+  const {idx,marker}=M.sel, meta=TRIP[cKey];
+  marker.setIcon(pinIcon(meta.accent,false));
+  marker.setLabel(pinLabel(idx+1,false));
+  marker.setZIndex(idx+1);
+  M.sel=null;
+}
+
+/* trigger a resize + refit when a hidden map's panel becomes visible */
+function refreshMap(cKey){
+  const M=MAPS[cKey]; if(!M) return;
+  google.maps.event.trigger(M.map,'resize');
+  if(selected[cKey]) updateMapForDay(cKey, selected[cKey], {fromScroll:true});
+}
+
+/* ---- current location (Geolocation API) ---- */
+function ensureGeolocation(){
+  if(window.__geoStarted || !navigator.geolocation) return;
+  window.__geoStarted=true;
+  navigator.geolocation.watchPosition(pos=>{
+    LAST_POS={lat:pos.coords.latitude,lng:pos.coords.longitude};
+    Object.keys(MAPS).forEach(updateMyLocation);
+    document.querySelectorAll('.me-btn').forEach(b=>{b.hidden=false;});
+  }, ()=>{}, {enableHighAccuracy:true, maximumAge:30000, timeout:27000});
+}
+function updateMyLocation(cKey){
+  const M=MAPS[cKey]; if(!M||!LAST_POS) return;
+  if(!M.me){
+    M.me=new google.maps.Marker({
+      position:LAST_POS, map:M.map, title:'Your location', zIndex:99999,
+      icon:{path:google.maps.SymbolPath.CIRCLE, scale:7, fillColor:'#4aa3ff',
+            fillOpacity:1, strokeColor:'#ffffff', strokeWeight:2.5},
+    });
+  } else { M.me.setPosition(LAST_POS); }
+}
+
+function selectDay(cKey,dayId,opts){
+  opts=opts||{};
+  /* highlight only — does NOT change open/closed state of any day */
+  const day=TRIP[cKey].days.find(d=>d.id===dayId); if(!day) return;
   // caption
-  const day=TRIP[cKey].days.find(d=>d.id===dayId);
   $('#cap-'+cKey).textContent=`${day.dow} · ${day.area}`;
   // header info
   const dayNumber=TRIP[cKey].days.findIndex(d=>d.id===dayId)+1;
@@ -1017,6 +1128,8 @@ function selectDay(cKey,dayId,opts){
   });
   selected[cKey]=dayId;
   updateDayStripActive(cKey, dayId, {scrollStrip: !opts.fromScroll});
+  // map highlight (no-op until the map for this country is ready)
+  updateMapForDay(cKey, dayId, opts);
 }
 
 /* ============================ SCROLL SYNC ============================ */
@@ -1078,6 +1191,7 @@ function setCountry(cKey, doScroll, initDayId){
   document.documentElement.style.setProperty('--accent', TRIP[cKey].accent);
   document.documentElement.style.setProperty('--accent-soft', TRIP[cKey].soft);
   initMap(cKey);
+  whenMapReady(()=>refreshMap(cKey));
   if(initDayId){
     forceOpenDay(cKey, initDayId);
     selectDay(cKey, initDayId);
@@ -1172,6 +1286,19 @@ if(window.ResizeObserver){
 }
 setCountry('kr',false);
 renderToday();
+
+/* ---- load the Google Maps JS API (calls gmapsBoot when ready) ---- */
+(function loadGoogleMaps(){
+  const s=document.createElement('script');
+  s.src=`https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(GMAPS_API_KEY)}&callback=gmapsBoot&loading=async`;
+  s.async=true; s.defer=true;
+  s.onerror=()=>{
+    document.querySelectorAll('.map-cap span[id^="cap-"]').forEach(el=>{
+      el.textContent='Map failed to load — check the Google Maps API key.';
+    });
+  };
+  document.head.appendChild(s);
+})();
 </script>
 </body>
 </html>
