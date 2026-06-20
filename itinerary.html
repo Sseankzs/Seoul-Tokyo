@@ -513,7 +513,7 @@
         <li>Day 5 — decide hill shrines vs Enoshima coast (the day won't fit both).</li>
       </ul>
     </div>
-    <p class="fc">Times are local to each destination. The “today” panel reads your device's date — append <span style="font-family:var(--mono)">?date=2026-07-11</span> to the address to preview any day. Map © Google. The blue dot marks your current location (needs location permission); tap a numbered pin to mark a stop.</p>
+    <p class="fc">Times are local to each destination. The “today” panel reads your device's date — append <span style="font-family:var(--mono)">?date=2026-07-11</span> to the address to preview any day. Map © Google. Each pin is a stop, numbered by the day it's visited — the selected day's pins are bright, the rest dimmed. The blue dot marks your current location (needs location permission); tap any pin to mark a stop.</p>
   </div>
 </footer>
 
@@ -986,12 +986,12 @@ const MAP_STYLE=[
   {featureType:'water',elementType:'labels.text.fill',stylers:[{color:'#4d4636'}]},
 ];
 function escHTML(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
-function pinIcon(color, sel){
+function pinIcon(color, sel, dim){
   return {
     path:'M12 0C6.5 0 2 4.5 2 10c0 6.6 10 18 10 18s10-11.4 10-18C22 4.5 17.5 0 12 0z',
-    fillColor:color, fillOpacity:1,
-    strokeColor:'#ffffff', strokeWeight:sel?2.4:1.2,
-    scale:sel?1.5:1.05,
+    fillColor:color, fillOpacity:dim?0.5:1,
+    strokeColor:'#ffffff', strokeOpacity:dim?0.6:1, strokeWeight:sel?2.4:1.2,
+    scale:sel?1.5:(dim?0.95:1.05),
     anchor:new google.maps.Point(12,28),
     labelOrigin:new google.maps.Point(12,10),
   };
@@ -1011,24 +1011,21 @@ function initMap(cKey){
   });
   const M={map, days:{}, me:null, info:new google.maps.InfoWindow(), sel:null};
   MAPS[cKey]=M;
-  // build per-day routes + numbered markers (hidden until their day is selected)
-  meta.days.forEach(d=>{
-    const pts=d.stops.map(s=>({lat:s.lat,lng:s.lng}));
-    const dash={path:'M 0,-1 0,1',strokeOpacity:.75,strokeWeight:2.6,scale:2,strokeColor:meta.accent};
-    const polyline=new google.maps.Polyline({path:pts,strokeOpacity:0,clickable:false,
-      icons:[{icon:dash,offset:'0',repeat:'14px'}]});
+  // every stop is a marker, labelled by its day number; all shown at once, no route line
+  meta.days.forEach((d,di)=>{
+    const dayNum=di+1;
     const bounds=new google.maps.LatLngBounds();
     const markers=d.stops.map((s,idx)=>{
       bounds.extend({lat:s.lat,lng:s.lng});
       const marker=new google.maps.Marker({
-        position:{lat:s.lat,lng:s.lng},
-        icon:pinIcon(meta.accent,false), label:pinLabel(idx+1,false),
-        zIndex:idx+1, title:s.n,
+        position:{lat:s.lat,lng:s.lng}, map:M.map,
+        icon:pinIcon(meta.accent,false,true), label:pinLabel(dayNum,false),
+        zIndex:dayNum, title:`Day ${dayNum} · ${s.n}`,
       });
       marker.addListener('click',()=>selectStop(cKey,d.id,idx));
       return marker;
     });
-    M.days[d.id]={polyline, markers, bounds};
+    M.days[d.id]={markers, bounds, dayNum};
   });
   // hook up the "My location" button for this map
   const meBtn=document.getElementById('me-'+cKey);
@@ -1040,19 +1037,22 @@ function initMap(cKey){
   ensureGeolocation();
 }
 
-/* show one day's route + markers, hide the rest, fit the view */
+/* emphasise the selected day's pins, dim the others (all stay visible), fit the view */
 function updateMapForDay(cKey,dayId,opts){
   opts=opts||{};
   const M=MAPS[cKey]; if(!M) return;
   clearSelStop(cKey);
   M.info.close();
-  Object.values(M.days).forEach(L0=>{
-    L0.polyline.setMap(null);
-    L0.markers.forEach(m=>m.setMap(null));
+  const accent=TRIP[cKey].accent;
+  Object.entries(M.days).forEach(([id,L0])=>{
+    const active=(id===dayId);
+    L0.markers.forEach(m=>{
+      m.setIcon(pinIcon(accent,false,!active));
+      m.setLabel(pinLabel(L0.dayNum,false));
+      m.setZIndex(active?500+L0.dayNum:L0.dayNum);
+    });
   });
   const cur=M.days[dayId]; if(!cur) return;
-  cur.polyline.setMap(M.map);
-  cur.markers.forEach(m=>m.setMap(M.map));
   if(cur.markers.length<=1){
     M.map.setCenter(cur.markers[0].getPosition()); M.map.setZoom(13);
   } else {
@@ -1064,21 +1064,22 @@ function updateMapForDay(cKey,dayId,opts){
 function selectStop(cKey,dayId,idx){
   const M=MAPS[cKey]; if(!M) return;
   clearSelStop(cKey);
-  const marker=M.days[dayId].markers[idx];
+  const L0=M.days[dayId], marker=L0.markers[idx];
   const s=TRIP[cKey].days.find(d=>d.id===dayId).stops[idx];
-  marker.setIcon(pinIcon(SEL_COLOR,true));
-  marker.setLabel(pinLabel(idx+1,true));
+  marker.setIcon(pinIcon(SEL_COLOR,true,false));
+  marker.setLabel(pinLabel(L0.dayNum,true));
   marker.setZIndex(9998);
   M.sel={dayId,idx,marker};
-  M.info.setContent(`<div class="gm-pop"><b>${idx+1}.</b> ${escHTML(s.n)}<br><a href="${mapsLink(s.lat,s.lng)}" target="_blank" rel="noopener">Open in Google Maps</a></div>`);
+  M.info.setContent(`<div class="gm-pop"><b>Day ${L0.dayNum}</b> · ${escHTML(s.n)}<br><a href="${mapsLink(s.lat,s.lng)}" target="_blank" rel="noopener">Open in Google Maps</a></div>`);
   M.info.open(M.map, marker);
 }
 function clearSelStop(cKey){
   const M=MAPS[cKey]; if(!M||!M.sel) return;
-  const {idx,marker}=M.sel, meta=TRIP[cKey];
-  marker.setIcon(pinIcon(meta.accent,false));
-  marker.setLabel(pinLabel(idx+1,false));
-  marker.setZIndex(idx+1);
+  const {dayId,marker}=M.sel, L0=M.days[dayId];
+  const active=(dayId===selected[cKey]);
+  marker.setIcon(pinIcon(TRIP[cKey].accent,false,!active));
+  marker.setLabel(pinLabel(L0.dayNum,false));
+  marker.setZIndex(active?500+L0.dayNum:L0.dayNum);
   M.sel=null;
 }
 
