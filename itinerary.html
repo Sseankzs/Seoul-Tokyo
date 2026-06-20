@@ -215,13 +215,15 @@
     font-size:12.5px;color:var(--ink-soft);display:flex;gap:9px;align-items:center;
   }
   .map-cap .dotk{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .cap-actions{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0}
   .me-btn{
-    margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-soft);
+    font-family:var(--mono);font-size:11px;color:var(--ink-soft);
     border:1px solid var(--rule);background:var(--paper-2);border-radius:999px;
     padding:4px 11px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;
     transition:color .15s,border-color .15s,background .15s;flex-shrink:0;
   }
   .me-btn:hover{color:var(--ink);border-color:var(--ink-soft)}
+  .me-btn.on{color:var(--ink);border-color:var(--accent);background:color-mix(in srgb, var(--accent) 16%, var(--paper-2))}
   .me-btn .me-dot{width:8px;height:8px;border-radius:50%;background:#4aa3ff;box-shadow:0 0 0 3px rgba(74,163,255,.25)}
   .me-btn[hidden]{display:none}
   /* Google Maps surface + dark InfoWindow */
@@ -456,7 +458,7 @@
     <div class="map-wrap">
       <div class="map-shell">
         <div class="map-el" id="map-kr"></div>
-        <div class="map-cap"><span class="dotk"></span><span id="cap-kr">Select a day to focus the map.</span><button class="me-btn" id="me-kr" type="button" hidden><span class="me-dot"></span>My location</button></div>
+        <div class="map-cap"><span class="dotk"></span><span id="cap-kr">Select a day to focus the map.</span><span class="cap-actions"><button class="me-btn" id="transit-kr" type="button" aria-pressed="false">Transit</button><button class="me-btn" id="me-kr" type="button" hidden><span class="me-dot"></span>My location</button></span></div>
       </div>
     </div>
     <div class="days" id="days-kr"></div>
@@ -486,7 +488,7 @@
     <div class="map-wrap">
       <div class="map-shell">
         <div class="map-el" id="map-jp"></div>
-        <div class="map-cap"><span class="dotk"></span><span id="cap-jp">Select a day to focus the map.</span><button class="me-btn" id="me-jp" type="button" hidden><span class="me-dot"></span>My location</button></div>
+        <div class="map-cap"><span class="dotk"></span><span id="cap-jp">Select a day to focus the map.</span><span class="cap-actions"><button class="me-btn" id="transit-jp" type="button" aria-pressed="false">Transit</button><button class="me-btn" id="me-jp" type="button" hidden><span class="me-dot"></span>My location</button></span></div>
       </div>
     </div>
     <div class="days" id="days-jp"></div>
@@ -1009,8 +1011,11 @@ function initMap(cKey){
     gestureHandling:'cooperative', clickableIcons:false,
     backgroundColor:'#0d0b07', keyboardShortcuts:false,
   });
-  const M={map, days:{}, me:null, info:new google.maps.InfoWindow(), sel:null};
+  const M={map, days:{}, me:null, info:new google.maps.InfoWindow(), sel:null, transit:null, transitOn:true};
   MAPS[cKey]=M;
+  // public-transit overlay (subway/rail lines) — on by default, toggleable
+  M.transit=new google.maps.TransitLayer();
+  M.transit.setMap(map);
   // every stop is a marker, labelled by its day number; all shown at once, no route line
   meta.days.forEach((d,di)=>{
     const dayNum=di+1;
@@ -1032,6 +1037,13 @@ function initMap(cKey){
   if(meBtn) meBtn.addEventListener('click',()=>{
     if(LAST_POS){ map.panTo(LAST_POS); map.setZoom(14); }
   });
+  // hook up the "Transit" toggle for this map
+  const trBtn=document.getElementById('transit-'+cKey);
+  if(trBtn){
+    const sync=()=>{ trBtn.classList.toggle('on',M.transitOn); trBtn.setAttribute('aria-pressed',M.transitOn?'true':'false'); };
+    sync();
+    trBtn.addEventListener('click',()=>{ M.transitOn=!M.transitOn; M.transit.setMap(M.transitOn?map:null); sync(); });
+  }
   if(selected[cKey]) updateMapForDay(cKey, selected[cKey], {});
   updateMyLocation(cKey);
   ensureGeolocation();
