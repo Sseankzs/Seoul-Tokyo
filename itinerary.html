@@ -209,7 +209,7 @@
     border:1px solid var(--rule);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);
     background:var(--paper);
   }
-  .map-el{height:440px;width:100%;background:#0d0b07}
+  .map-el{height:440px;width:100%;background:#e8e6e1}
   .map-cap{
     padding:11px 16px;border-top:1px solid var(--rule-soft);
     font-size:12.5px;color:var(--ink-soft);display:flex;gap:9px;align-items:center;
@@ -227,7 +227,7 @@
   .me-btn .me-dot{width:8px;height:8px;border-radius:50%;background:#4aa3ff;box-shadow:0 0 0 3px rgba(74,163,255,.25)}
   .me-btn[hidden]{display:none}
   /* Google Maps surface + dark InfoWindow */
-  #map-kr,#map-jp{background:#0d0b07}
+  #map-kr,#map-jp{background:#e8e6e1}
   .gm-style .gm-style-iw-c{
     background:var(--paper)!important;border:1px solid var(--rule)!important;
     border-radius:10px!important;box-shadow:var(--shadow)!important;padding:0!important;
@@ -971,22 +971,6 @@ let GMAPS_READY=false; const _mapQueue=[];
 function whenMapReady(fn){ if(GMAPS_READY) fn(); else _mapQueue.push(fn); }
 window.gmapsBoot=function(){ GMAPS_READY=true; _mapQueue.splice(0).forEach(fn=>{try{fn();}catch(e){}}); };
 
-const MAP_STYLE=[
-  {elementType:'geometry',stylers:[{color:'#15130d'}]},
-  {elementType:'labels.text.stroke',stylers:[{color:'#15130d'}]},
-  {elementType:'labels.text.fill',stylers:[{color:'#9a917f'}]},
-  {featureType:'administrative',elementType:'geometry',stylers:[{visibility:'off'}]},
-  {featureType:'administrative.locality',elementType:'labels.text.fill',stylers:[{color:'#c9c0ad'}]},
-  {featureType:'administrative.neighborhood',elementType:'labels',stylers:[{visibility:'off'}]},
-  {featureType:'poi',stylers:[{visibility:'off'}]},
-  {featureType:'road',elementType:'geometry',stylers:[{color:'#26221a'}]},
-  {featureType:'road',elementType:'geometry.stroke',stylers:[{visibility:'off'}]},
-  {featureType:'road',elementType:'labels.text.fill',stylers:[{color:'#7a7363'}]},
-  {featureType:'road.highway',elementType:'geometry',stylers:[{color:'#3a3326'}]},
-  {featureType:'transit',stylers:[{visibility:'off'}]},
-  {featureType:'water',elementType:'geometry',stylers:[{color:'#0c0a07'}]},
-  {featureType:'water',elementType:'labels.text.fill',stylers:[{color:'#4d4636'}]},
-];
 function escHTML(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function pinIcon(color, sel, dim){
   return {
@@ -1006,10 +990,9 @@ function initMap(cKey){
   const meta=TRIP[cKey];
   const map=new google.maps.Map(document.getElementById('map-'+cKey),{
     center:{lat:36.5,lng:128}, zoom:6,
-    styles:MAP_STYLE,
     disableDefaultUI:true, zoomControl:true,
     gestureHandling:'cooperative', clickableIcons:false,
-    backgroundColor:'#0d0b07', keyboardShortcuts:false,
+    backgroundColor:'#e8e6e1', keyboardShortcuts:false,
   });
   const M={map, days:{}, me:null, info:new google.maps.InfoWindow(), sel:null, transit:null, transitOn:true};
   MAPS[cKey]=M;
