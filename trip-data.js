@@ -2,7 +2,7 @@
 /* Shared by itinerary.html and checklist.html — edit here once. */
 const TRIP = {
   kr: {
-    accent:'#d49a78', soft:'#2c1d14',
+    accent:'#c06a3a', soft:'#33200f',
     days:[
       { id:'kr1', date:'2026-07-10', dow:'Fri', title:'Arrival + Work Day', area:'Jongno, Seoul',
         stops:[
@@ -80,7 +80,7 @@ const TRIP = {
     ]
   },
   jp: {
-    accent:'#94b3c4', soft:'#172530',
+    accent:'#4d82a6', soft:'#15293a',
     days:[
       { id:'jp1', date:'2026-07-13', dow:'Mon', title:'Arrive + settle', area:'Narita → Shibuya → Miyamaedaira',
         stops:[
